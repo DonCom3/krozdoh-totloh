@@ -68,7 +68,8 @@
 
         /* Главная: Восстановление и Кольца */
         .recovery-card { display: flex; gap: 16px; align-items: center; }
-        .heatmap-svg { width: 100px; height: 160px; flex-shrink: 0; }
+        .heatmap-svg { width: 120px; height: 180px; flex-shrink: 0; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5)); }
+        .muscle-path { stroke: #111; stroke-width: 1.5; stroke-linejoin: round; transition: fill 0.4s ease; }
         .recovery-info { flex: 1; }
         .recovery-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px; }
         .recovery-item { display: flex; align-items: center; gap: 4px; }
@@ -77,13 +78,14 @@
         .dot.yellow { background: var(--accent-orange); }
         .dot.red { background: var(--accent-red); }
 
-        .rings-container { display: flex; justify-content: space-around; align-items: center; padding: 10px 0; }
-        .ring-box { text-align: center; position: relative; width: 80px; height: 80px; }
-        .ring-svg { transform: rotate(-90deg); }
-        .ring-bg { fill: none; stroke: #333; stroke-width: 8; }
-        .ring-fill { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 0.5s ease; }
-        .ring-val { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; font-weight: bold; }
-        .ring-label { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+        /* Кольца активности */
+        .rings-container { display: flex; justify-content: space-around; align-items: center; padding: 10px 0; min-height: 110px; }
+        .ring-box { text-align: center; position: relative; width: 90px; height: 90px; }
+        .ring-svg { width: 90px; height: 90px; transform: rotate(-90deg); overflow: visible; }
+        .ring-bg { fill: none; stroke: #2a2a2a; stroke-width: 8; }
+        .ring-fill { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .ring-val { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 16px; font-weight: 900; color: #fff; }
+        .ring-label { font-size: 10px; color: var(--text-muted); margin-top: 8px; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;}
 
         /* Тренировка */
         .workout-selector { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 20px; padding-bottom: 4px; scrollbar-width: none; }
@@ -181,17 +183,8 @@
             <!-- ЭКРАН 0: ОНБОРДИНГ -->
             <section id="view-onboarding" class="active">
                 <div class="ob-progress"><div class="ob-progress-fill" id="ob-progress-bar"></div></div>
-                
-                <div class="ob-step active" id="ob-step-1">
-                    <h2 style="margin-bottom: 16px;">Как тебя зовут?</h2>
-                    <input type="text" id="ob-name" class="name-input" placeholder="Твое имя" oninput="checkName()">
-                </div>
-
-                <div class="ob-step" id="ob-step-2">
-                    <h2 style="margin-bottom: 16px;">Твой вес (кг)</h2>
-                    <input type="number" id="ob-weight" class="name-input" placeholder="Например, 75" oninput="checkWeight()">
-                </div>
-
+                <div class="ob-step active" id="ob-step-1"><h2 style="margin-bottom: 16px;">Как тебя зовут?</h2><input type="text" id="ob-name" class="name-input" placeholder="Твое имя" oninput="checkName()"></div>
+                <div class="ob-step" id="ob-step-2"><h2 style="margin-bottom: 16px;">Твой вес (кг)</h2><input type="number" id="ob-weight" class="name-input" placeholder="Например, 75" oninput="checkWeight()"></div>
                 <div class="ob-step" id="ob-step-3">
                     <h2 style="margin-bottom: 16px;">Твой возраст</h2>
                     <div class="ob-option" onclick="selectOb('age', '18-25', this)">18–25 лет</div>
@@ -199,21 +192,18 @@
                     <div class="ob-option" onclick="selectOb('age', '36-45', this)">36–45 лет</div>
                     <div class="ob-option" onclick="selectOb('age', '45+', this)">Старше 45 лет</div>
                 </div>
-
                 <div class="ob-step" id="ob-step-4">
                     <h2 style="margin-bottom: 16px;">Опыт тренировок</h2>
                     <div class="ob-option" onclick="selectOb('exp', 'beginner', this)">Новичок (до 1 года)</div>
                     <div class="ob-option" onclick="selectOb('exp', 'intermediate', this)">Средний (1–3 года)</div>
                     <div class="ob-option" onclick="selectOb('exp', 'advanced', this)">Продвинутый (3+ года)</div>
                 </div>
-
                 <div class="ob-step" id="ob-step-5">
                     <h2 style="margin-bottom: 16px;">Главная цель</h2>
                     <div class="ob-option" onclick="selectOb('goal', 'mass', this)">Набор массы и силы</div>
                     <div class="ob-option" onclick="selectOb('goal', 'fatloss', this)">Жиросжигание и тонус</div>
                     <div class="ob-option" onclick="selectOb('goal', 'health', this)">Здоровье и поддержка</div>
                 </div>
-
                 <div class="ob-step" id="ob-step-6">
                     <h2 style="margin-bottom: 16px;">Дней в неделю</h2>
                     <div class="ob-option" onclick="selectOb('days', '2', this)">2 дня (Фулбоди)</div>
@@ -221,44 +211,45 @@
                     <div class="ob-option" onclick="selectOb('days', '4', this)">4 дня (Верх/Низ)</div>
                     <div class="ob-option" onclick="selectOb('days', '5', this)">5 дней (PPLUL)</div>
                 </div>
-
                 <button class="btn btn-primary" style="margin-top: 24px;" id="ob-next-btn" onclick="nextObStep()" disabled>Далее</button>
             </section>
 
             <!-- ЭКРАН 1: ГЛАВНАЯ -->
             <section id="view-dashboard">
-                <!-- Кольца активности -->
+                <!-- КОЛЬЦА АКТИВНОСТИ -->
                 <div class="card">
                     <h3 style="font-size: 16px; margin-bottom: 12px;">Прогресс за неделю</h3>
-                    <div class="rings-container" id="rings-container">
-                        <!-- Кольца рендерятся через JS -->
-                    </div>
+                    <div class="rings-container" id="rings-container"></div>
                 </div>
 
+                <!-- ТЕПЛОВАЯ КАРТА -->
                 <div class="card">
                     <h3 style="font-size: 16px; margin-bottom: 12px;">Восстановление мышц</h3>
                     <div class="recovery-card">
                         <svg class="heatmap-svg" viewBox="0 0 100 200" xmlns="http://www.w3.org/2000/svg">
-                            <!-- Перерисованный анатомический силуэт -->
-                            <circle cx="50" cy="15" r="12" fill="#333" />
-                            <!-- Торс -->
-                            <path d="M 30 30 L 70 30 L 75 80 L 60 80 L 55 110 L 45 110 L 40 80 L 25 80 Z" fill="#333" />
-                            <!-- Руки -->
-                            <path d="M 25 35 L 20 75 L 25 85 L 30 80 L 33 50 Z" fill="#333" id="arm-left" />
-                            <path d="M 75 35 L 80 75 L 75 85 L 70 80 L 67 50 Z" fill="#333" id="arm-right" />
-                            <!-- Ноги -->
-                            <path d="M 40 110 L 48 110 L 45 160 L 35 160 Z" fill="#333" id="leg-left" />
-                            <path d="M 60 110 L 52 110 L 55 160 L 65 160 Z" fill="#333" id="leg-right" />
+                            <!-- Контур тела (базовый) -->
+                            <path d="M 40 10 Q 50 5 60 10 L 65 20 L 75 25 L 80 45 L 75 65 L 80 90 L 70 110 L 65 140 L 70 180 L 60 180 L 55 140 L 50 120 L 45 140 L 40 180 L 30 180 L 35 140 L 30 110 L 20 90 L 25 65 L 20 45 L 25 25 L 35 20 Z" fill="#1a1a1a" stroke="#333" stroke-width="1.5" />
                             
-                            <!-- Мышцы (с ID для закраски) -->
-                            <path id="muscle-chest" d="M 35 40 Q 50 35 65 40 L 60 60 Q 50 65 40 60 Z" fill="#444" />
-                            <path id="muscle-back" d="M 25 45 Q 35 40 35 80 L 25 80 Z" fill="#444" />
-                            <path id="muscle-shoulders" d="M 25 35 Q 30 25 35 35 L 30 40 Z M 75 35 Q 70 25 65 35 L 70 40 Z" fill="#444" />
-                            <path id="muscle-arms-biceps" d="M 22 50 L 28 50 L 30 75 L 24 75 Z M 78 50 L 72 50 L 70 75 L 76 75 Z" fill="#444" />
-                            <path id="muscle-arms-triceps" d="M 20 50 L 25 50 L 27 75 L 22 75 Z M 80 50 L 75 50 L 73 75 L 78 75 Z" fill="#444" />
-                            <path id="muscle-quads" d="M 40 110 L 48 110 L 45 145 L 38 145 Z M 60 110 L 52 110 L 55 145 L 62 145 Z" fill="#444" />
-                            <path id="muscle-hamstrings" d="M 38 145 L 45 145 L 42 160 L 35 160 Z M 62 145 L 55 145 L 58 160 L 65 160 Z" fill="#444" />
-                            <path id="muscle-core" d="M 42 65 L 58 65 L 55 90 L 45 90 Z" fill="#444" />
+                            <!-- Мышцы (закрашиваются) -->
+                            <!-- Плечи -->
+                            <path id="m-shoulders" class="muscle-path" d="M 25 30 Q 30 20 38 25 L 35 40 Z M 75 30 Q 70 20 62 25 L 65 40 Z" fill="#444" />
+                            <!-- Грудь -->
+                            <path id="m-chest" class="muscle-path" d="M 36 35 Q 50 32 64 35 L 60 55 Q 50 58 40 55 Z" fill="#444" />
+                            <!-- Пресс -->
+                            <path id="m-abs" class="muscle-path" d="M 42 58 L 58 58 L 56 95 L 50 100 L 44 95 Z" fill="#444" />
+                            <!-- Косые -->
+                            <path id="m-obliques" class="muscle-path" d="M 35 60 L 41 60 L 43 95 L 33 90 Z M 65 60 L 59 60 L 57 95 L 67 90 Z" fill="#444" />
+                            <!-- Бицепс -->
+                            <path id="m-biceps" class="muscle-path" d="M 25 45 L 35 45 L 32 75 L 22 70 Z M 75 45 L 65 45 L 68 75 L 78 70 Z" fill="#444" />
+                            <!-- Трицепс (вид сзади/сбоку) -->
+                            <path id="m-triceps" class="muscle-path" d="M 20 45 L 24 45 L 21 70 L 17 65 Z M 80 45 L 76 45 L 79 70 L 83 65 Z" fill="#444" />
+                            <!-- Квадрицепс -->
+                            <path id="m-quads" class="muscle-path" d="M 36 105 L 48 105 L 45 150 L 35 145 Z M 64 105 L 52 105 L 55 150 L 65 145 Z" fill="#444" />
+                            <!-- Икры -->
+                            <path id="m-calves" class="muscle-path" d="M 35 155 L 43 155 L 40 175 L 32 175 Z M 65 155 L 57 155 L 60 175 L 68 175 Z" fill="#444" />
+                            
+                            <!-- Линии волокон (декор) -->
+                            <path d="M 40 40 L 48 40 M 45 45 L 55 45 M 52 50 L 60 50 M 45 65 L 45 80 M 55 65 L 55 80 M 42 120 L 42 140 M 58 120 L 58 140" stroke="#222" stroke-width="1.5" stroke-linecap="round"/>
                         </svg>
                         <div class="recovery-info">
                             <div class="recovery-list" id="recovery-list"></div>
@@ -280,15 +271,10 @@
             <!-- ЭКРАН 2: ТРЕНИРОВКА -->
             <section id="view-workout">
                 <div class="workout-selector" id="workout-tabs"></div>
-
                 <div class="timer-box">
-                    <div>
-                        <div style="font-size: 12px; color: #888;">Длительность</div>
-                        <div class="timer-display" id="timer-display">00:00</div>
-                    </div>
+                    <div><div style="font-size: 12px; color: #888;">Длительность</div><div class="timer-display" id="timer-display">00:00</div></div>
                     <button class="timer-btn" id="timer-btn" onclick="toggleTimer()">Старт</button>
                 </div>
-
                 <div id="exercise-container"></div>
                 <button class="btn btn-outline" onclick="openModal('modal-add-ex')">+ Свое упражнение</button>
                 <button class="btn btn-primary" style="margin-top: 24px;" onclick="saveWorkoutToHistory()">Завершить тренировку</button>
@@ -344,68 +330,27 @@
 
         <!-- МОДАЛКИ -->
         <div id="modal-calc" class="modal"><div class="modal-content"><h3 style="margin-bottom: 16px;">Калькулятор 1ПМ</h3><div style="display: flex; gap: 10px;"><input type="number" id="calc-weight" class="modal-input" placeholder="Вес (кг)"><input type="number" id="calc-reps" class="modal-input" placeholder="Повторы"></div><button class="btn btn-primary" onclick="runCalculator()">Рассчитать</button><div id="calc-result" style="display: none; background: #111; padding: 16px; border-radius: 8px; margin-top: 16px;"><div id="calc-1rm" style="font-size: 24px; font-weight: bold; color: var(--accent);"></div><div id="calc-warmup" style="font-size: 14px; margin-top: 8px;"></div></div><button class="btn" style="background: #333; color: white; margin-top: 16px;" onclick="closeModal('modal-calc')">Закрыть</button></div></div>
-
         <div id="modal-add-ex" class="modal"><div class="modal-content"><h3 style="margin-bottom: 16px;">Новое упражнение</h3><input type="text" id="add-name" class="modal-input" placeholder="Название"><div style="display: flex; gap: 10px;"><input type="number" id="add-sets" class="modal-input" placeholder="Подходы (4)"><input type="text" id="add-reps" class="modal-input" placeholder="Повторы (6-8)"></div><div style="display: flex; gap: 10px; margin-top: 10px;"><button class="btn" style="background: #333; color: white;" onclick="closeModal('modal-add-ex')">Отмена</button><button class="btn btn-primary" onclick="addCustomExercise()">Добавить</button></div></div></div>
-
         <div id="modal-food" class="modal"><div class="modal-content"><h3 id="food-modal-title" style="margin-bottom: 16px; font-size: 18px;">Продукт</h3><input type="number" id="food-grams" class="modal-input" value="100" oninput="updateFoodCalc()"><div class="food-calc-box" style="background: #111; padding: 16px; border-radius: 8px; text-align: center; margin-bottom: 16px; display: flex; justify-content: space-around;"><div><div style="font-size: 20px; font-weight: bold; color: var(--accent-orange);" id="food-calc-kcal">0</div><div style="font-size: 12px; color: #666;">ккал</div></div><div><div style="font-size: 20px; font-weight: bold; color: var(--accent);" id="food-calc-prot">0</div><div style="font-size: 12px; color: #666;">белка</div></div></div><div style="display: flex; gap: 10px;"><button class="btn" style="background: #333; color: white;" onclick="closeModal('modal-food')">Отмена</button><button class="btn btn-primary" onclick="confirmAddFood()">Добавить</button></div></div></div>
-
         <div id="modal-profile" class="modal"><div class="modal-content"><h3 style="margin-bottom: 16px;">Профиль</h3><div id="profile-details" style="margin-bottom: 20px; font-size: 14px; line-height: 1.6; color: #ccc;"></div><button class="btn" style="background: #ff4444; color: white;" onclick="resetProfile()">Сбросить профиль</button><button class="btn" style="background: #333; color: white; margin-top: 10px;" onclick="closeModal('modal-profile')">Закрыть</button></div></div>
     </div>
 
     <script>
-        // --- БАЗА ПРОДУКТОВ (сокращена для читаемости, можно расширить) ---
         const foodDatabase = [
-            { id: 'chicken', name: 'Куриная грудка', emoji: '🍗', kcal100: 110, prot100: 23 }, { id: 'beef', name: 'Говядина', emoji: '🥩', kcal100: 200, prot100: 26 }, { id: 'eggs', name: 'Яйца', emoji: '🥚', kcal100: 155, prot100: 13 }, { id: 'rice', name: 'Рис', emoji: '🍚', kcal100: 130, prot100: 2.5 }, { id: 'buckwheat', name: 'Гречка', emoji: '🌾', kcal100: 110, prot100: 4 }, { id: 'oats', name: 'Овсянка', emoji: '🥣', kcal100: 370, prot100: 13 }, { id: 'pasta', name: 'Макароны', emoji: '🍝', kcal100: 150, prot100: 5 }, { id: 'potato', name: 'Картофель', emoji: '🥔', kcal100: 90, prot100: 2 }, { id: 'bread', name: 'Хлеб', emoji: '🍞', kcal100: 250, prot100: 8 }, { id: 'pancakes', name: 'Блины', emoji: '🥞', kcal100: 230, prot100: 6 }, { id: 'pizza', name: 'Пицца', emoji: '🍕', kcal100: 260, prot100: 11 }, { id: 'burger', name: 'Бургер', emoji: '🍔', kcal100: 295, prot100: 15 }, { id: 'banana', name: 'Банан', emoji: '🍌', kcal100: 90, prot100: 1.5 }, { id: 'apple', name: 'Яблоко', emoji: '🍎', kcal100: 52, prot100: 0.3 }, { id: 'avocado', name: 'Авокадо', emoji: '🥑', kcal100: 160, prot100: 2 }, { id: 'milk', name: 'Молоко', emoji: '🥛', kcal100: 52, prot100: 3 }, { id: 'cola', name: 'Кола', emoji: '🥤', kcal100: 42, prot100: 0 }, { id: 'beer', name: 'Пиво', emoji: '🍺', kcal100: 42, prot100: 0.5 }, { id: 'wine', name: 'Вино', emoji: '🍷', kcal100: 85, prot100: 0.1 }, { id: 'vodka', name: 'Водка', emoji: '🍸', kcal100: 235, prot100: 0 }
+            { id: 'chicken_breast', name: 'Куриная грудка', emoji: '🍗', kcal100: 110, prot100: 23 }, { id: 'chicken_thigh', name: 'Куриное бедро', emoji: '🍗', kcal100: 160, prot100: 18 }, { id: 'turkey', name: 'Индейка', emoji: '🦃', kcal100: 110, prot100: 24 }, { id: 'beef', name: 'Говядина', emoji: '🥩', kcal100: 200, prot100: 26 }, { id: 'veal', name: 'Телятина', emoji: '🥩', kcal100: 150, prot100: 22 }, { id: 'pork', name: 'Свинина', emoji: '🥓', kcal100: 260, prot100: 25 }, { id: 'bacon', name: 'Бекон', emoji: '🥓', kcal100: 540, prot100: 37 }, { id: 'lamb', name: 'Баранина', emoji: '🐑', kcal100: 250, prot100: 22 }, { id: 'duck', name: 'Утка', emoji: '🦆', kcal100: 330, prot100: 19 }, { id: 'ham', name: 'Ветчина', emoji: '🍖', kcal100: 150, prot100: 20 }, { id: 'sausage', name: 'Колбаса вареная', emoji: '🌭', kcal100: 250, prot100: 12 }, { id: 'salami', name: 'Салями', emoji: '🍕', kcal100: 400, prot100: 20 }, { id: 'liver', name: 'Печень куриная', emoji: '🍖', kcal100: 140, prot100: 20 }, { id: 'rabbit', name: 'Кролик', emoji: '🐇', kcal100: 170, prot100: 21 }, { id: 'cod', name: 'Треска', emoji: '🐟', kcal100: 80, prot100: 18 }, { id: 'salmon', name: 'Лосось', emoji: '🍣', kcal100: 200, prot100: 20 }, { id: 'tuna', name: 'Тунец', emoji: '🐟', kcal100: 130, prot100: 23 }, { id: 'mackerel', name: 'Скумбрия', emoji: '🐟', kcal100: 250, prot100: 18 }, { id: 'herring', name: 'Сельдь', emoji: '🐟', kcal100: 250, prot100: 17 }, { id: 'trout', name: 'Форель', emoji: '🐟', kcal100: 140, prot100: 20 }, { id: 'shrimp', name: 'Креветки', emoji: '🍤', kcal100: 100, prot100: 20 }, { id: 'squid', name: 'Кальмар', emoji: '🦑', kcal100: 90, prot100: 15 }, { id: 'crab', name: 'Крабовые палочки', emoji: '🦀', kcal100: 90, prot100: 6 }, { id: 'caviar', name: 'Икра', emoji: '🥫', kcal100: 250, prot100: 25 }, { id: 'mussels', name: 'Мидии', emoji: '🦪', kcal100: 70, prot100: 12 }, { id: 'octopus', name: 'Осьминог', emoji: '🐙', kcal100: 80, prot100: 15 }, { id: 'eggs', name: 'Яйца куриные', emoji: '🥚', kcal100: 155, prot100: 13 }, { id: 'quail_eggs', name: 'Яйца перепелиные', emoji: '🥚', kcal100: 168, prot100: 13 }, { id: 'milk', name: 'Молоко 2.5%', emoji: '🥛', kcal100: 52, prot100: 3 }, { id: 'milk_skim', name: 'Молоко обезжир.', emoji: '🥛', kcal100: 34, prot100: 3 }, { id: 'kefir', name: 'Кефир', emoji: '🥛', kcal100: 40, prot100: 3 }, { id: 'yogurt', name: 'Йогурт натуральный', emoji: '🥛', kcal100: 60, prot100: 5 }, { id: 'yogurt_greek', name: 'Йогурт греческий', emoji: '🥛', kcal100: 90, prot100: 9 }, { id: 'cottage', name: 'Творог 5%', emoji: '🧀', kcal100: 120, prot100: 18 }, { id: 'cottage_0', name: 'Творог обезжир.', emoji: '🧀', kcal100: 80, prot100: 18 }, { id: 'cheese', name: 'Сыр твердый', emoji: '🧀', kcal100: 350, prot100: 25 }, { id: 'mozzarella', name: 'Моцарелла', emoji: '🧀', kcal100: 280, prot100: 22 }, { id: 'sour_cream', name: 'Сметана 20%', emoji: '🥛', kcal100: 200, prot100: 3 }, { id: 'butter', name: 'Масло сливочное', emoji: '🧈', kcal100: 717, prot100: 1 }, { id: 'cream', name: 'Сливки 10%', emoji: '🥛', kcal100: 120, prot100: 3 }, { id: 'tofu', name: 'Тофу', emoji: '🧊', kcal100: 76, prot100: 8 }, { id: 'rice', name: 'Рис отварной', emoji: '🍚', kcal100: 130, prot100: 2.5 }, { id: 'buckwheat', name: 'Гречка отварная', emoji: '🌾', kcal100: 110, prot100: 4 }, { id: 'oats', name: 'Овсянка (сухая)', emoji: '🥣', kcal100: 370, prot100: 13 }, { id: 'pasta', name: 'Макароны отварные', emoji: '🍝', kcal100: 150, prot100: 5 }, { id: 'spaghetti', name: 'Спагетти', emoji: '🍝', kcal100: 160, prot100: 6 }, { id: 'bulgur', name: 'Булгур', emoji: '🌾', kcal100: 340, prot100: 12 }, { id: 'quinoa', name: 'Киноа', emoji: '🌾', kcal100: 368, prot100: 14 }, { id: 'bread_white', name: 'Хлеб белый', emoji: '🍞', kcal100: 250, prot100: 8 }, { id: 'bread_black', name: 'Хлеб черный', emoji: '🍞', kcal100: 220, prot100: 7 }, { id: 'bread_borodino', name: 'Хлеб Бородинский', emoji: '🍞', kcal100: 210, prot100: 7 }, { id: 'lavash', name: 'Лаваш тонкий', emoji: '🫓', kcal100: 270, prot100: 9 }, { id: 'corn', name: 'Кукуруза', emoji: '🌽', kcal100: 86, prot100: 3.2 }, { id: 'potato', name: 'Картофель', emoji: '🥔', kcal100: 90, prot100: 2 }, { id: 'sweet_potato', name: 'Батат', emoji: '🍠', kcal100: 86, prot100: 1.6 }, { id: 'broccoli', name: 'Брокколи', emoji: '🥦', kcal100: 34, prot100: 3 }, { id: 'spinach', name: 'Шпинат', emoji: '🥬', kcal100: 23, prot100: 3 }, { id: 'tomato', name: 'Помидор', emoji: '🍅', kcal100: 18, prot100: 1 }, { id: 'cucumber', name: 'Огурец', emoji: '🥒', kcal100: 15, prot100: 0.7 }, { id: 'carrot', name: 'Морковь', emoji: '🥕', kcal100: 41, prot100: 0.9 }, { id: 'onion', name: 'Лук', emoji: '🧅', kcal100: 40, prot100: 1.1 }, { id: 'pepper', name: 'Перец болгарский', emoji: '🫑', kcal100: 26, prot100: 1 }, { id: 'cabbage', name: 'Капуста', emoji: '🥬', kcal100: 25, prot100: 1.3 }, { id: 'cauliflower', name: 'Цветная капуста', emoji: '🥦', kcal100: 25, prot100: 2 }, { id: 'zucchini', name: 'Кабачок', emoji: '🥒', kcal100: 17, prot100: 1.2 }, { id: 'avocado', name: 'Авокадо', emoji: '🥑', kcal100: 160, prot100: 2 }, { id: 'mushrooms', name: 'Грибы', emoji: '🍄', kcal100: 27, prot100: 4 }, { id: 'peas', name: 'Горошек', emoji: '🟢', kcal100: 81, prot100: 5 }, { id: 'banana', name: 'Банан', emoji: '🍌', kcal100: 90, prot100: 1.5 }, { id: 'apple', name: 'Яблоко', emoji: '🍎', kcal100: 52, prot100: 0.3 }, { id: 'orange', name: 'Апельсин', emoji: '🍊', kcal100: 47, prot100: 0.9 }, { id: 'pear', name: 'Груша', emoji: '🍐', kcal100: 57, prot100: 0.4 }, { id: 'grape', name: 'Виноград', emoji: '🍇', kcal100: 69, prot100: 0.7 }, { id: 'strawberry', name: 'Клубника', emoji: '🍓', kcal100: 32, prot100: 0.7 }, { id: 'blueberry', name: 'Голубика', emoji: '🫐', kcal100: 57, prot100: 0.7 }, { id: 'kiwi', name: 'Киви', emoji: '🥝', kcal100: 61, prot100: 1.1 }, { id: 'watermelon', name: 'Арбуз', emoji: '🍉', kcal100: 30, prot100: 0.6 }, { id: 'pineapple', name: 'Ананас', emoji: '🍍', kcal100: 50, prot100: 0.5 }, { id: 'lemon', name: 'Лимон', emoji: '🍋', kcal100: 29, prot100: 1.1 }, { id: 'peach', name: 'Персик', emoji: '🍑', kcal100: 39, prot100: 0.9 }, { id: 'almonds', name: 'Миндаль', emoji: '🌰', kcal100: 600, prot100: 21 }, { id: 'walnuts', name: 'Грецкий орех', emoji: '🌰', kcal100: 654, prot100: 15 }, { id: 'cashew', name: 'Кешью', emoji: '🌰', kcal100: 553, prot100: 18 }, { id: 'peanuts', name: 'Арахис', emoji: '🥜', kcal100: 567, prot100: 26 }, { id: 'sunflower_seeds', name: 'Семечки', emoji: '🌻', kcal100: 584, prot100: 21 }, { id: 'olive_oil', name: 'Масло оливковое', emoji: '🫒', kcal100: 884, prot100: 0 }, { id: 'peanut_butter', name: 'Паста арахисовая', emoji: '🥜', kcal100: 588, prot100: 25 }, { id: 'chia', name: 'Семена чиа', emoji: '⚫', kcal100: 486, prot100: 17 }, { id: 'pancakes', name: 'Блины', emoji: '🥞', kcal100: 230, prot100: 6 }, { id: 'pancakes_cheese', name: 'Сырники', emoji: '🥞', kcal100: 220, prot100: 14 }, { id: 'chocolate_dark', name: 'Шоколад темный', emoji: '🍫', kcal100: 546, prot100: 4.9 }, { id: 'chocolate_milk', name: 'Шоколад молочный', emoji: '🍫', kcal100: 535, prot100: 7.6 }, { id: 'cookie', name: 'Печенье', emoji: '🍪', kcal100: 450, prot100: 5 }, { id: 'cake', name: 'Торт', emoji: '🍰', kcal100: 350, prot100: 4 }, { id: 'ice_cream', name: 'Мороженое', emoji: '🍦', kcal100: 200, prot100: 3.5 }, { id: 'honey', name: 'Мед', emoji: '🍯', kcal100: 300, prot100: 0.3 }, { id: 'condensed_milk', name: 'Сгущенка', emoji: '🍯', kcal100: 320, prot100: 7.5 }, { id: 'sugar', name: 'Сахар', emoji: '🧂', kcal100: 400, prot100: 0 }, { id: 'jam', name: 'Варенье', emoji: '🍓', kcal100: 250, prot100: 0.3 }, { id: 'croissant', name: 'Круассан', emoji: '🥐', kcal100: 406, prot100: 8 }, { id: 'pizza', name: 'Пицца', emoji: '🍕', kcal100: 260, prot100: 11 }, { id: 'burger', name: 'Бургер', emoji: '🍔', kcal100: 295, prot100: 15 }, { id: 'fries', name: 'Картофель фри', emoji: '🍟', kcal100: 312, prot100: 3.4 }, { id: 'sushi', name: 'Роллы', emoji: '🍣', kcal100: 150, prot100: 6 }, { id: 'noodles', name: 'Лапша вок', emoji: '🍜', kcal100: 180, prot100: 6 }, { id: 'borscht', name: 'Борщ', emoji: '🍲', kcal100: 50, prot100: 2 }, { id: 'soup', name: 'Суп куриный', emoji: '🍲', kcal100: 40, prot100: 3 }, { id: 'shaurma', name: 'Шаурма', emoji: '🌯', kcal100: 220, prot100: 12 }, { id: 'protein', name: 'Протеин (порошок)', emoji: '💪', kcal100: 375, prot100: 75 }, { id: 'bcaa', name: 'BCAA', emoji: '💪', kcal100: 0, prot100: 0 }, { id: 'creatine', name: 'Креатин', emoji: '💪', kcal100: 0, prot100: 0 }, { id: 'gainer', name: 'Гейнер', emoji: '💪', kcal100: 380, prot100: 15 }, { id: 'water', name: 'Вода', emoji: '💧', kcal100: 0, prot100: 0 }, { id: 'coffee', name: 'Кофе черный', emoji: '☕', kcal100: 2, prot100: 0.3 }, { id: 'latte', name: 'Латте', emoji: '☕', kcal100: 50, prot100: 3 }, { id: 'cappuccino', name: 'Капучино', emoji: '☕', kcal100: 40, prot100: 2.5 }, { id: 'tea_green', name: 'Чай зеленый', emoji: '🍵', kcal100: 1, prot100: 0 }, { id: 'tea_black', name: 'Чай черный', emoji: '🍵', kcal100: 1, prot100: 0 }, { id: 'juice_orange', name: 'Сок апельсиновый', emoji: '🍊', kcal100: 45, prot100: 0.7 }, { id: 'juice_apple', name: 'Сок яблочный', emoji: '🍏', kcal100: 46, prot100: 0.1 }, { id: 'juice_tomato', name: 'Сок томатный', emoji: '🍅', kcal100: 20, prot100: 1 }, { id: 'smoothie', name: 'Смузи', emoji: '🥤', kcal100: 60, prot100: 1 }, { id: 'milk_shake', name: 'Молочный коктейль', emoji: '🥤', kcal100: 110, prot100: 3 }, { id: 'cola', name: 'Кола', emoji: '🥤', kcal100: 42, prot100: 0 }, { id: 'sprite', name: 'Спрайт', emoji: '🥤', kcal100: 40, prot100: 0 }, { id: 'energy', name: 'Энергетик', emoji: '⚡', kcal100: 45, prot100: 0 }, { id: 'lemonade', name: 'Лимонад', emoji: '🍋', kcal100: 35, prot100: 0 }, { id: 'kvass', name: 'Квас', emoji: '🍺', kcal100: 25, prot100: 0.2 }, { id: 'beer_light', name: 'Пиво светлое', emoji: '🍺', kcal100: 42, prot100: 0.5 }, { id: 'beer_dark', name: 'Пиво темное', emoji: '🍺', kcal100: 48, prot100: 0.6 }, { id: 'wine_red', name: 'Вино красное', emoji: '🍷', kcal100: 85, prot100: 0.1 }, { id: 'wine_white', name: 'Вино белое', emoji: '🍷', kcal100: 82, prot100: 0.1 }, { id: 'champagne', name: 'Шампанское', emoji: '🍾', kcal100: 80, prot100: 0.2 }, { id: 'vodka', name: 'Водка', emoji: '🍸', kcal100: 235, prot100: 0 }, { id: 'whiskey', name: 'Виски', emoji: '🥃', kcal100: 250, prot100: 0 }, { id: 'rum', name: 'Ром', emoji: '🥃', kcal100: 231, prot100: 0 }, { id: 'mojito', name: 'Мохито', emoji: '🍹', kcal100: 90, prot100: 0.1 }, { id: 'cider', name: 'Сидр', emoji: '🍎', kcal100: 46, prot100: 0 }
         ];
 
-        // --- БАЗА УПРАЖНЕНИЙ (строго по группам) ---
         const exercisePool = {
-            chest: [
-                { name: 'Жим штанги лежа', equip: 'Штанга', type: 'compound' },
-                { name: 'Жим гантелей лежа', equip: 'Гантели', type: 'compound' },
-                { name: 'Отжимания на брусьях', equip: 'Свой вес', type: 'compound' },
-                { name: 'Разводка гантелей', equip: 'Гантели', type: 'isolation' }
-            ],
-            back: [
-                { name: 'Становая тяга', equip: 'Штанга', type: 'compound' },
-                { name: 'Подтягивания', equip: 'Турник', type: 'compound' },
-                { name: 'Тяга штанги в наклоне', equip: 'Штанга', type: 'compound' },
-                { name: 'Тяга верхнего блока', equip: 'Блок', type: 'compound' }
-            ],
-            shoulders: [
-                { name: 'Жим штанги стоя', equip: 'Штанга', type: 'compound' },
-                { name: 'Жим гантелей сидя', equip: 'Гантели', type: 'compound' },
-                { name: 'Махи гантелями в стороны', equip: 'Гантели', type: 'isolation' },
-                { name: 'Разведения в наклоне', equip: 'Гантели', type: 'isolation' }
-            ],
-            biceps: [
-                { name: 'Подъем штанги на бицепс', equip: 'Штанга', type: 'isolation' },
-                { name: 'Сгибание рук с гантелями', equip: 'Гантели', type: 'isolation' },
-                { name: 'Молотковые сгибания', equip: 'Гантели', type: 'isolation' }
-            ],
-            triceps: [
-                { name: 'Французский жим', equip: 'Штанга', type: 'isolation' },
-                { name: 'Разгибание на трицепс на блоке', equip: 'Блок', type: 'isolation' },
-                { name: 'Отжимания от скамьи', equip: 'Свой вес', type: 'isolation' }
-            ],
-            legs: [
-                { name: 'Присед со штангой', equip: 'Штанга', type: 'compound' },
-                { name: 'Жим ногами', equip: 'Тренажер', type: 'compound' },
-                { name: 'Румынская тяга', equip: 'Штанга', type: 'compound' },
-                { name: 'Выпады с гантелями', equip: 'Гантели', type: 'compound' },
-                { name: 'Разгибание ног', equip: 'Тренажер', type: 'isolation' },
-                { name: 'Сгибание ног', equip: 'Тренажер', type: 'isolation' },
-                { name: 'Подъем на носки', equip: 'Тренажер', type: 'isolation' }
-            ],
-            core: [
-                { name: 'Планка', equip: 'Свой вес', type: 'isolation' },
-                { name: 'Скручивания', equip: 'Свой вес', type: 'isolation' },
-                { name: 'Подъем ног в висе', equip: 'Турник', type: 'compound' }
-            ]
+            chest: [ { name: 'Жим штанги лежа', equip: 'Штанга', type: 'compound' }, { name: 'Жим гантелей лежа', equip: 'Гантели', type: 'compound' }, { name: 'Отжимания на брусьях', equip: 'Свой вес', type: 'compound' }, { name: 'Разводка гантелей', equip: 'Гантели', type: 'isolation' } ],
+            back: [ { name: 'Становая тяга', equip: 'Штанга', type: 'compound' }, { name: 'Подтягивания', equip: 'Турник', type: 'compound' }, { name: 'Тяга штанги в наклоне', equip: 'Штанга', type: 'compound' }, { name: 'Тяга верхнего блока', equip: 'Блок', type: 'compound' } ],
+            shoulders: [ { name: 'Жим штанги стоя', equip: 'Штанга', type: 'compound' }, { name: 'Жим гантелей сидя', equip: 'Гантели', type: 'compound' }, { name: 'Махи гантелями в стороны', equip: 'Гантели', type: 'isolation' }, { name: 'Разведения в наклоне', equip: 'Гантели', type: 'isolation' } ],
+            biceps: [ { name: 'Подъем штанги на бицепс', equip: 'Штанга', type: 'isolation' }, { name: 'Сгибание рук с гантелями', equip: 'Гантели', type: 'isolation' }, { name: 'Молотковые сгибания', equip: 'Гантели', type: 'isolation' } ],
+            triceps: [ { name: 'Французский жим', equip: 'Штанга', type: 'isolation' }, { name: 'Разгибание на трицепс на блоке', equip: 'Блок', type: 'isolation' }, { name: 'Отжимания от скамьи', equip: 'Свой вес', type: 'isolation' } ],
+            legs: [ { name: 'Присед со штангой', equip: 'Штанга', type: 'compound' }, { name: 'Жим ногами', equip: 'Тренажер', type: 'compound' }, { name: 'Румынская тяга', equip: 'Штанга', type: 'compound' }, { name: 'Выпады с гантелями', equip: 'Гантели', type: 'compound' }, { name: 'Разгибание ног', equip: 'Тренажер', type: 'isolation' }, { name: 'Сгибание ног', equip: 'Тренажер', type: 'isolation' }, { name: 'Подъем на носки', equip: 'Тренажер', type: 'isolation' } ],
+            core: [ { name: 'Планка', equip: 'Свой вес', type: 'isolation' }, { name: 'Скручивания', equip: 'Свой вес', type: 'isolation' }, { name: 'Подъем ног в висе', equip: 'Турник', type: 'compound' } ]
         };
 
-        // Маппинг для тепловой карты
-        const muscleMap = { 'chest': 'chest', 'back': 'back', 'shoulders': 'shoulders', 'biceps': 'arms-biceps', 'triceps': 'arms-triceps', 'legs': 'quads', 'core': 'core' };
+        const muscleMap = { 'Жим лежа': 'chest', 'Отжимания': 'chest', 'Разводка': 'chest', 'Сведение': 'chest', 'Брусьях': 'chest', 'Подтягивания': 'back', 'Тяга': 'back', 'Становая': 'back', 'Присед': 'quads', 'Выпады': 'quads', 'Жим ногами': 'quads', 'Разгибание ног': 'quads', 'Сгибание ног': 'quads', 'Носки': 'quads', 'Жим штанги стоя': 'shoulders', 'Жим гантелей сидя': 'shoulders', 'Махи': 'shoulders', 'Разведения': 'shoulders', 'Бицепс': 'arms', 'Молотковые': 'arms', 'Французский': 'arms', 'Трицепс': 'arms', 'Планка': 'core', 'Скручивания': 'core', 'Подъем ног': 'core' };
 
         let state = { profile: null, nutrition: { kcal: 0, prot: 0 }, history: [], weeklyPlan: [], activeWorkoutName: '', activeExercises: [], activeDayIndex: 0, sessionSeconds: 0, isTimerRunning: false, timerStartTime: null, recovery: { chest: 0, back: 0, quads: 0, shoulders: 0, arms: 0, core: 0 }, restTime: 90 };
         let currentFood = null, filteredFoods = [...foodDatabase];
@@ -413,10 +358,10 @@
         let restEndTime = 0;
 
         function loadData() {
-            const saved = localStorage.getItem('ktoSdohTotLohV20'); 
+            const saved = localStorage.getItem('ktoSdohTotLohV23'); 
             if (saved) { state = JSON.parse(saved); if(state.profile) { startApp(); if(state.isTimerRunning && state.timerStartTime) startTimerLogic(); else updateTimerDisplay(); } else showOnboarding(); } else showOnboarding();
         }
-        function saveData() { localStorage.setItem('ktoSdohTotLohV20', JSON.stringify(state)); }
+        function saveData() { localStorage.setItem('ktoSdohTotLohV23', JSON.stringify(state)); }
         function createEmptySets(count) { return Array.from({ length: count }, () => ({ w: '', r: '', done: false, tag: 'normal' })); }
 
         let currentObStep = 1;
@@ -441,10 +386,14 @@
         }
 
         function generateProfile() {
-            let baseKcal = obData.goal === 'mass' ? 3200 : obData.goal === 'fatloss' ? 2200 : 2600; let baseProt = obData.goal === 'mass' ? 160 : 150; state.profile = { ...obData, targetKcal: baseKcal, targetProt: baseProt }; generateWeeklyPlan(); saveData(); startApp();
+            try {
+                let baseKcal = obData.goal === 'mass' ? 3200 : obData.goal === 'fatloss' ? 2200 : 2600; 
+                let baseProt = obData.goal === 'mass' ? 160 : 150; 
+                state.profile = { ...obData, targetKcal: baseKcal, targetProt: baseProt }; 
+                generateWeeklyPlan(); saveData(); startApp();
+            } catch (e) { alert('Ошибка создания профиля: ' + e.message); console.error(e); }
         }
 
-        // --- ИСПРАВЛЕННЫЙ ГЕНЕРАТОР (строго по сплитам) ---
         function generateWeeklyPlan() {
             const { days, exp, age } = state.profile; const isOlder = age === '36-45' || age === '45+'; const isBeginner = exp === 'beginner'; let daysCount = parseInt(days);
             let setsCount = 3, repsStr = '12-15', restTime = 90; if (exp === 'advanced' && !isOlder) { setsCount = 5; repsStr = '5-6'; restTime = 120; } else if (exp === 'intermediate') { setsCount = 4; repsStr = '8-10'; restTime = 90; }
@@ -462,10 +411,17 @@
                 return { name: dayName, exercises: dayExercises };
             };
 
-            if (daysCount === 2) { plan.push(buildDay('День 1: Фулбоди', ['legs', 'chest', 'back'])); plan.push(buildDay('День 2: Фулбоди', ['legs', 'shoulders', 'arms'])); } 
-            else if (daysCount === 3) { if (exp === 'advanced' && !isOlder) { plan.push(buildDay('День 1: Push (Жим)', ['chest', 'shoulders', 'triceps'])); plan.push(buildDay('День 2: Pull (Тяга)', ['back', 'biceps'])); plan.push(buildDay('День 3: Legs (Ноги)', ['legs'])); } else { plan.push(buildDay('День 1: Фулбоди', ['legs', 'chest', 'back'])); plan.push(buildDay('День 2: Фулбоди', ['legs', 'shoulders', 'arms'])); plan.push(buildDay('День 3: Фулбоди', ['legs', 'chest', 'back', 'core'])); } }
-            else if (daysCount === 4) { plan.push(buildDay('День 1: Верх A', ['chest', 'back', 'shoulders'])); plan.push(buildDay('День 2: Низ A', ['legs'])); plan.push(buildDay('День 3: Верх B', ['back', 'chest', 'arms'])); plan.push(buildDay('День 4: Низ B', ['legs', 'core'])); }
-            else if (daysCount === 5) { plan.push(buildDay('День 1: Push', ['chest', 'shoulders', 'triceps'])); plan.push(buildDay('День 2: Pull', ['back', 'biceps'])); plan.push(buildDay('День 3: Legs', ['legs'])); plan.push(buildDay('День 4: Upper', ['chest', 'back', 'shoulders'])); plan.push(buildDay('День 5: Lower', ['legs', 'core'])); }
+            if (daysCount === 2) { 
+                plan.push(buildDay('День 1: Фулбоди', ['legs', 'chest', 'back'])); 
+                plan.push(buildDay('День 2: Фулбоди', ['legs', 'shoulders', 'biceps', 'triceps'])); 
+            } else if (daysCount === 3) { 
+                if (exp === 'advanced' && !isOlder) { plan.push(buildDay('День 1: Push', ['chest', 'shoulders', 'triceps'])); plan.push(buildDay('День 2: Pull', ['back', 'biceps'])); plan.push(buildDay('День 3: Legs', ['legs'])); } 
+                else { plan.push(buildDay('День 1: Фулбоди', ['legs', 'chest', 'back'])); plan.push(buildDay('День 2: Фулбоди', ['legs', 'shoulders', 'biceps', 'triceps'])); plan.push(buildDay('День 3: Фулбоди', ['legs', 'chest', 'back', 'core'])); } 
+            } else if (daysCount === 4) { 
+                plan.push(buildDay('День 1: Верх A', ['chest', 'back', 'shoulders'])); plan.push(buildDay('День 2: Низ A', ['legs'])); plan.push(buildDay('День 3: Верх B', ['back', 'chest', 'biceps', 'triceps'])); plan.push(buildDay('День 4: Низ B', ['legs', 'core'])); 
+            } else if (daysCount === 5) { 
+                plan.push(buildDay('День 1: Push', ['chest', 'shoulders', 'triceps'])); plan.push(buildDay('День 2: Pull', ['back', 'biceps'])); plan.push(buildDay('День 3: Legs', ['legs'])); plan.push(buildDay('День 4: Upper', ['chest', 'back', 'shoulders'])); plan.push(buildDay('День 5: Lower', ['legs', 'core'])); 
+            }
 
             plan.forEach(day => { day.exercises = day.exercises.map(ex => ({ name: ex.name, equip: ex.equip, target: `${setsCount} х ${repsStr}`, sets: setsCount })); });
             state.weeklyPlan = plan; loadWorkout(0); 
@@ -475,58 +431,61 @@
             document.getElementById('view-onboarding').classList.remove('active'); document.getElementById('main-nav').style.display = 'flex'; document.getElementById('profile-btn').style.display = 'block'; document.getElementById('header-subtitle').innerText = `Привет, ${state.profile.name}!`; renderAll(); switchTab('dashboard');
         }
 
-        function loadWorkout(dayIndex) { const day = state.weeklyPlan[dayIndex]; state.activeWorkoutName = day.name; state.activeDayIndex = dayIndex; state.activeExercises = day.exercises.map((ex, i) => ({ id: `${dayIndex}-${i}`, dayIndex: dayIndex, name: ex.name, target: ex.target, equipment: ex.equip, sets: createEmptySets(ex.sets) })); saveData(); }
+        function loadWorkout(dayIndex) { const day = state.weeklyPlan[dayIndex]; if(!day) return; state.activeWorkoutName = day.name; state.activeDayIndex = dayIndex; state.activeExercises = day.exercises.map((ex, i) => ({ id: `${dayIndex}-${i}`, dayIndex: dayIndex, name: ex.name, target: ex.target, equipment: ex.equip, sets: createEmptySets(ex.sets) })); saveData(); }
 
-        // --- РЕНДЕР ---
         function renderAll() {
             renderNutrition(); renderWorkoutTabs(); renderExercises(); renderHistory(); renderHeatmap(); renderRings(); if(state.activeWorkoutName) document.getElementById('dash-workout-name').innerText = state.activeWorkoutName;
         }
 
-        // --- ТЕПЛОВАЯ КАРТА (исправленная) ---
+        // --- ТЕПЛОВАЯ КАРТА (ИСПРАВЛЕНА) ---
         function renderHeatmap() {
             const now = Date.now(); const list = document.getElementById('recovery-list'); list.innerHTML = ''; 
+            
+            // Сначала сбрасываем ВСЕ мышцы в темно-серый
+            document.querySelectorAll('.muscle-path').forEach(el => el.setAttribute('fill', '#444'));
+
             const muscles = [
-                { id: 'chest', name: 'Грудь', targets: ['muscle-chest'] },
-                { id: 'back', name: 'Спина', targets: ['muscle-back'] },
-                { id: 'quads', name: 'Ноги', targets: ['muscle-quads', 'muscle-hamstrings'] },
-                { id: 'shoulders', name: 'Плечи', targets: ['muscle-shoulders'] },
-                { id: 'arms', name: 'Руки', targets: ['muscle-arms-biceps', 'muscle-arms-triceps'] },
-                { id: 'core', name: 'Пресс', targets: ['muscle-core'] }
+                { id: 'chest', name: 'Грудь', targets: ['m-chest'] }, { id: 'back', name: 'Спина', targets: ['m-obliques'] }, // Упрощенно
+                { id: 'quads', name: 'Ноги', targets: ['m-quads', 'm-calves'] }, { id: 'shoulders', name: 'Плечи', targets: ['m-shoulders'] },
+                { id: 'arms', name: 'Руки', targets: ['m-biceps', 'm-triceps'] }, { id: 'core', name: 'Пресс', targets: ['m-abs'] }
             ];
+            
             muscles.forEach(m => {
                 let lastTime = state.recovery[m.id] || 0; let daysAgo = (now - lastTime) / (1000 * 3600 * 24); 
-                let color = 'green', colorHex = '#a3e635'; if (daysAgo < 1) { color = 'red'; colorHex = '#ef4444'; } else if (daysAgo < 2) { color = 'yellow'; colorHex = '#f97316'; } 
-                m.targets.forEach(tid => { let el = document.getElementById(tid); if(el) el.setAttribute('fill', colorHex); });
-                list.innerHTML += `<div class="recovery-item"><div class="dot ${color}"></div> ${m.name}</div>`; 
+                let color = 'green', colorHex = '#a3e635'; 
+                if (daysAgo < 1) { color = 'red'; colorHex = '#ef4444'; } 
+                else if (daysAgo < 2) { color = 'yellow'; colorHex = '#f97316'; } 
+                else if (daysAgo > 1000) { color = 'gray'; colorHex = '#444'; } // Если не тренировали
+                
+                m.targets.forEach(tid => { let el = document.getElementById(tid); if(el && color !== 'gray') el.setAttribute('fill', colorHex); });
+                list.innerHTML += `<div class="recovery-item"><div class="dot ${color === 'gray' ? '' : color}" style="${color === 'gray' ? 'background:#444' : ''}"></div> ${m.name}</div>`; 
             });
         }
 
-        // --- КОЛЬЦА АКТИВНОСТИ ---
+        // --- КОЛЬЦА АКТИВНОСТИ (ИСПРАВЛЕНЫ) ---
         function renderRings() {
             const container = document.getElementById('rings-container');
-            const weekHistory = state.history.slice(-7); // Последние 7 записей
+            const weekHistory = state.history.slice(-7); 
             let totalTime = 0, totalKcal = 0, totalSets = 0;
-            weekHistory.forEach(session => { totalTime += session.duration; totalKcal += session.kcal || 0; totalSets += session.totalSets || 0; });
+            weekHistory.forEach(session => { totalTime += session.duration || 0; totalKcal += session.kcal || 0; totalSets += session.totalSets || 0; });
 
-            const timeGoal = 180; // 3 часа в неделю
-            const kcalGoal = 2000;
-            const setsGoal = 100;
-
+            const timeGoal = 180, kcalGoal = 2000, setsGoal = 100;
             const createRing = (label, value, goal, color) => {
-                const percent = Math.min(value / goal, 1);
-                const radius = 30, circumference = 2 * Math.PI * radius, offset = circumference - percent * circumference;
+                const percent = Math.min(value / goal, 1); 
+                const radius = 35; // Увеличили радиус
+                const circumference = 2 * Math.PI * radius; 
+                const offset = circumference - percent * circumference;
                 return `
                     <div class="ring-box">
-                        <svg class="ring-svg" width="80" height="80">
-                            <circle class="ring-bg" cx="40" cy="40" r="${radius}"></circle>
-                            <circle class="ring-fill" cx="40" cy="40" r="${radius}" stroke="${color}" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"></circle>
+                        <svg class="ring-svg" viewBox="0 0 90 90">
+                            <circle class="ring-bg" cx="45" cy="45" r="${radius}"></circle>
+                            <circle class="ring-fill" cx="45" cy="45" r="${radius}" stroke="${color}" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"></circle>
                         </svg>
                         <div class="ring-val">${value}</div>
                         <div class="ring-label">${label}</div>
                     </div>
                 `;
             };
-
             container.innerHTML = createRing('Мин', totalTime, timeGoal, 'var(--accent)') + createRing('Ккал', totalKcal, kcalGoal, 'var(--accent-orange)') + createRing('Подх.', totalSets, setsGoal, 'var(--accent-blue)');
         }
 
@@ -583,26 +542,22 @@
             
             const now = new Date();
             const duration = Math.max(1, Math.round(state.sessionSeconds / 60));
-            
-            // --- РАСЧЕТ КАЛОРИЙ (MET 5.0 для средней интенсивности) ---
-            const weight = state.profile.weight || 75; // fallback
+            const weight = state.profile.weight || 75; 
             const MET = 5.0; 
             const kcalBurned = Math.round(MET * weight * (duration / 60));
 
-            // --- ПОДСЧЕТ ПОДХОДОВ ---
             let totalSets = 0;
             state.activeExercises.forEach(ex => ex.sets.forEach(s => { if (s.done) totalSets++; }));
 
-            state.activeExercises.forEach(ex => { for (const [key, muscle] of Object.entries(muscleMap)) { if (ex.name.includes(key)) { state.recovery[muscle] = Date.now(); break; } } });
+            state.activeExercises.forEach(ex => { 
+                for (const [key, muscle] of Object.entries(muscleMap)) { 
+                    if (ex.name.includes(key)) { state.recovery[muscle] = Date.now(); break; } 
+                } 
+            });
             
             state.history.push({ 
                 date: now.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' }), 
-                timestamp: now.getTime(), 
-                name: state.activeWorkoutName, 
-                duration: duration, 
-                kcal: kcalBurned,
-                totalSets: totalSets,
-                exercises: JSON.parse(JSON.stringify(state.activeExercises)) 
+                timestamp: now.getTime(), name: state.activeWorkoutName, duration: duration, kcal: kcalBurned, totalSets: totalSets, exercises: JSON.parse(JSON.stringify(state.activeExercises)) 
             });
             
             loadWorkout(state.activeDayIndex); stopTimer(true); saveData(); renderAll(); switchTab('calendar'); 
