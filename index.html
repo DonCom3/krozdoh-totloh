@@ -232,10 +232,7 @@
                     <div class="recovery-card">
                         <div class="heatmap-container">
                             <svg class="heatmap-svg" viewBox="0 0 100 200" xmlns="http://www.w3.org/2000/svg">
-                                <!-- Базовый контур тела -->
                                 <path d="M 40 10 Q 50 5 60 10 L 65 20 L 75 25 L 80 45 L 75 65 L 80 90 L 70 110 L 65 140 L 70 180 L 60 180 L 55 140 L 50 120 L 45 140 L 40 180 L 30 180 L 35 140 L 30 110 L 20 90 L 25 65 L 20 45 L 25 25 L 35 20 Z" fill="#151515" stroke="#333" stroke-width="1.5" />
-                                
-                                <!-- Мышцы -->
                                 <path id="m-shoulders" class="muscle-path" d="M 25 30 Q 30 20 38 25 L 35 40 Z M 75 30 Q 70 20 62 25 L 65 40 Z" fill="#444" />
                                 <path id="m-chest" class="muscle-path" d="M 36 35 Q 50 32 64 35 L 60 55 Q 50 58 40 55 Z" fill="#444" />
                                 <path id="m-abs" class="muscle-path" d="M 42 58 L 58 58 L 56 95 L 50 100 L 44 95 Z" fill="#444" />
@@ -244,7 +241,6 @@
                                 <path id="m-triceps" class="muscle-path" d="M 20 45 L 24 45 L 21 70 L 17 65 Z M 80 45 L 76 45 L 79 70 L 83 65 Z" fill="#444" />
                                 <path id="m-quads" class="muscle-path" d="M 36 105 L 48 105 L 45 150 L 35 145 Z M 64 105 L 52 105 L 55 150 L 65 145 Z" fill="#444" />
                                 <path id="m-calves" class="muscle-path" d="M 35 155 L 43 155 L 40 175 L 32 175 Z M 65 155 L 57 155 L 60 175 L 68 175 Z" fill="#444" />
-                                
                                 <path d="M 40 40 L 48 40 M 45 45 L 55 45 M 52 50 L 60 50 M 45 65 L 45 80 M 55 65 L 55 80 M 42 120 L 42 140 M 58 120 L 58 140" stroke="#222" stroke-width="1.5" stroke-linecap="round"/>
                             </svg>
                         </div>
@@ -326,9 +322,26 @@
         </nav>
 
         <!-- МОДАЛКИ -->
+        <!-- 1. Калькулятор -->
         <div id="modal-calc" class="modal"><div class="modal-content"><h3 style="margin-bottom: 16px;">Калькулятор 1ПМ</h3><div style="display: flex; gap: 10px;"><input type="number" id="calc-weight" class="modal-input" placeholder="Вес (кг)"><input type="number" id="calc-reps" class="modal-input" placeholder="Повторы"></div><button class="btn btn-primary" onclick="runCalculator()">Рассчитать</button><div id="calc-result" style="display: none; background: #111; padding: 16px; border-radius: 8px; margin-top: 16px;"><div id="calc-1rm" style="font-size: 24px; font-weight: bold; color: var(--accent);"></div><div id="calc-warmup" style="font-size: 14px; margin-top: 8px;"></div></div><button class="btn" style="background: #333; color: white; margin-top: 16px;" onclick="closeModal('modal-calc')">Закрыть</button></div></div>
+
+        <!-- 2. ИНФО ОБ УПРАЖНЕНИИ (ВОССТАНОВЛЕНО) -->
+        <div id="modal-ex-info" class="modal">
+            <div class="modal-content">
+                <h3 id="info-ex-name" style="margin-bottom: 4px; font-size: 20px;">Упражнение</h3>
+                <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Инвентарь: <span id="info-ex-equip" style="color: white; font-weight: bold;">-</span></div>
+                <button id="info-ex-video-btn" class="btn btn-primary" style="margin-bottom: 10px;">▶ Смотреть технику</button>
+                <button class="btn" style="background: #333; color: white;" onclick="closeModal('modal-ex-info')">Закрыть</button>
+            </div>
+        </div>
+
+        <!-- 3. Добавить упражнение -->
         <div id="modal-add-ex" class="modal"><div class="modal-content"><h3 style="margin-bottom: 16px;">Новое упражнение</h3><input type="text" id="add-name" class="modal-input" placeholder="Название"><div style="display: flex; gap: 10px;"><input type="number" id="add-sets" class="modal-input" placeholder="Подходы (4)"><input type="text" id="add-reps" class="modal-input" placeholder="Повторы (6-8)"></div><div style="display: flex; gap: 10px; margin-top: 10px;"><button class="btn" style="background: #333; color: white;" onclick="closeModal('modal-add-ex')">Отмена</button><button class="btn btn-primary" onclick="addCustomExercise()">Добавить</button></div></div></div>
+
+        <!-- 4. Еда -->
         <div id="modal-food" class="modal"><div class="modal-content"><h3 id="food-modal-title" style="margin-bottom: 16px; font-size: 18px;">Продукт</h3><input type="number" id="food-grams" class="modal-input" value="100" oninput="updateFoodCalc()"><div class="food-calc-box" style="background: #111; padding: 16px; border-radius: 8px; text-align: center; margin-bottom: 16px; display: flex; justify-content: space-around;"><div><div style="font-size: 20px; font-weight: bold; color: var(--accent-orange);" id="food-calc-kcal">0</div><div style="font-size: 12px; color: #666;">ккал</div></div><div><div style="font-size: 20px; font-weight: bold; color: var(--accent);" id="food-calc-prot">0</div><div style="font-size: 12px; color: #666;">белка</div></div></div><div style="display: flex; gap: 10px;"><button class="btn" style="background: #333; color: white;" onclick="closeModal('modal-food')">Отмена</button><button class="btn btn-primary" onclick="confirmAddFood()">Добавить</button></div></div></div>
+
+        <!-- 5. Профиль -->
         <div id="modal-profile" class="modal"><div class="modal-content"><h3 style="margin-bottom: 16px;">Профиль</h3><div id="profile-details" style="margin-bottom: 20px; font-size: 14px; line-height: 1.6; color: #ccc;"></div><button class="btn" style="background: #ff4444; color: white;" onclick="resetProfile()">Сбросить профиль</button><button class="btn" style="background: #333; color: white; margin-top: 10px;" onclick="closeModal('modal-profile')">Закрыть</button></div></div>
     </div>
 
@@ -362,10 +375,17 @@
         let restEndTime = 0;
 
         function loadData() {
-            const saved = localStorage.getItem('ktoSdohTotLohV25'); 
-            if (saved) { state = JSON.parse(saved); if(state.profile) { startApp(); if(state.isTimerRunning && state.timerStartTime) startTimerLogic(); else updateTimerDisplay(); } else showOnboarding(); } else showOnboarding();
+            const saved = localStorage.getItem('ktoSdohTotLohV27'); 
+            if (saved) { 
+                state = JSON.parse(saved); 
+                if(state.profile) { 
+                    startApp(); 
+                    if(state.isTimerRunning && state.timerStartTime) startTimerLogic(); 
+                    else updateTimerDisplay(); 
+                } else showOnboarding(); 
+            } else showOnboarding();
         }
-        function saveData() { localStorage.setItem('ktoSdohTotLohV25', JSON.stringify(state)); }
+        function saveData() { localStorage.setItem('ktoSdohTotLohV27', JSON.stringify(state)); }
         function createEmptySets(count) { return Array.from({ length: count }, () => ({ w: '', r: '', done: false, tag: 'normal' })); }
 
         let currentObStep = 1;
@@ -427,8 +447,17 @@
                 plan.push(buildDay('День 1: Push', ['chest', 'shoulders', 'triceps'])); plan.push(buildDay('День 2: Pull', ['back', 'biceps'])); plan.push(buildDay('День 3: Legs', ['legs'])); plan.push(buildDay('День 4: Upper', ['chest', 'back', 'shoulders'])); plan.push(buildDay('День 5: Lower', ['legs', 'core'])); 
             }
 
-            plan.forEach(day => { day.exercises = day.exercises.map(ex => ({ name: ex.name, equip: ex.equip, target: `${setsCount} х ${repsStr}`, sets: setsCount })); });
-            state.weeklyPlan = plan; loadWorkout(0); 
+            plan.forEach(day => { 
+                day.exercises = day.exercises.map(ex => ({ 
+                    name: ex.name, 
+                    equip: ex.equip, 
+                    target: `${setsCount} х ${repsStr}`, 
+                    sets: createEmptySets(setsCount)
+                })); 
+            });
+            
+            state.weeklyPlan = plan; 
+            loadWorkout(0); 
         }
 
         function startApp() {
@@ -437,10 +466,16 @@
             switchTab('dashboard');
         }
 
-        function loadWorkout(dayIndex) { const day = state.weeklyPlan[dayIndex]; if(!day) return; state.activeWorkoutName = day.name; state.activeDayIndex = dayIndex; state.activeExercises = day.exercises.map((ex, i) => ({ id: `${dayIndex}-${i}`, dayIndex: dayIndex, name: ex.name, target: ex.target, equipment: ex.equip, sets: createEmptySets(ex.sets) })); saveData(); }
+        function loadWorkout(dayIndex) { 
+            const day = state.weeklyPlan[dayIndex]; 
+            if(!day) return; 
+            state.activeWorkoutName = day.name; 
+            state.activeDayIndex = dayIndex; 
+            state.activeExercises = day.exercises; 
+            saveData(); 
+        }
 
         function renderAll() {
-            // Осторожный рендер: проверяем наличие элементов, чтобы ничего не падало
             if(document.getElementById('rings-container')) renderRings();
             if(document.getElementById('recovery-list')) renderHeatmap();
             if(document.getElementById('workout-tabs')) renderWorkoutTabs();
@@ -569,8 +604,18 @@
                 timestamp: now.getTime(), name: state.activeWorkoutName, duration: duration, kcal: kcalBurned, totalSets: totalSets, exercises: JSON.parse(JSON.stringify(state.activeExercises)) 
             });
             
-            loadWorkout(state.activeDayIndex); stopTimer(true); saveData(); renderAll(); switchTab('calendar'); 
-            if(navigator.vibrate) navigator.vibrate([100, 50, 100]); alert(`Тренировка сохранена! Сожжено ~${kcalBurned} ккал.`);
+            // ОЧИЩАЕМ ПРОГРЕСС ТЕКУЩЕГО ДНЯ (сбрасываем веса и галочки)
+            state.weeklyPlan[state.activeDayIndex].exercises.forEach(ex => {
+                ex.sets = createEmptySets(ex.sets.length);
+            });
+
+            loadWorkout(state.activeDayIndex); 
+            stopTimer(true); 
+            saveData(); 
+            renderAll(); 
+            switchTab('calendar'); 
+            if(navigator.vibrate) navigator.vibrate([100, 50, 100]); 
+            alert(`Тренировка сохранена! Сожжено ~${kcalBurned} ккал.`);
         }
 
         function renderNutrition() { 
@@ -593,11 +638,29 @@
             if (barProt) barProt.style.width = Math.min((state.nutrition.prot / targetP) * 100, 100) + '%';
         }
 
-        function renderWorkoutTabs() { const container = document.getElementById('workout-tabs'); container.innerHTML = ''; (state.weeklyPlan || []).forEach((day, index) => { container.innerHTML += `<div class="w-tab ${state.activeDayIndex === index ? 'active' : ''}" onclick="changeWorkoutDay(${index})">${day.name.split(':')[0]}<br><small>${day.name.split(':')[1]}</small></div>`; }); }
+        function renderWorkoutTabs() { 
+            const container = document.getElementById('workout-tabs'); 
+            container.innerHTML = ''; 
+            (state.weeklyPlan || []).forEach((day, index) => { 
+                container.innerHTML += `<div class="w-tab ${state.activeDayIndex === index ? 'active' : ''}" onclick="changeWorkoutDay(${index})">${day.name.split(':')[0]}<br><small>${day.name.split(':')[1]}</small></div>`; 
+            }); 
+        }
 
-        function changeWorkoutDay(index) { if (state.isTimerRunning && confirm('Сбросить текущую тренировку?')) stopTimer(true); loadWorkout(index); renderAll(); if(navigator.vibrate) navigator.vibrate(30); }
+        function changeWorkoutDay(index) { 
+            loadWorkout(index); 
+            renderAll(); 
+            if(navigator.vibrate) navigator.vibrate(30); 
+        }
 
-        function openExInfo(name, equipment) { document.getElementById('info-ex-name').innerText = name; document.getElementById('info-ex-equip').innerText = equipment; document.getElementById('info-ex-video-btn').onclick = () => window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(name + ' техника выполнения')}`, '_blank'); openModal('modal-ex-info'); }
+        // --- ВОССТАНОВЛЕННАЯ ФУНКЦИЯ ИНФО ---
+        function openExInfo(name, equipment) { 
+            document.getElementById('info-ex-name').innerText = name; 
+            document.getElementById('info-ex-equip').innerText = equipment; 
+            document.getElementById('info-ex-video-btn').onclick = () => {
+                window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(name + ' техника выполнения')}`, '_blank');
+            }; 
+            openModal('modal-ex-info'); 
+        }
 
         function toggleTimer() { if (state.isTimerRunning) stopTimer(); else startTimer(); }
         function startTimer() { state.isTimerRunning = true; state.timerStartTime = Date.now(); saveData(); startTimerLogic(); }
