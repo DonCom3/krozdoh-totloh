@@ -8,8 +8,9 @@
     <title>Кто сдох, тот лох</title>
     <style>
         :root {
-            --bg-color: #121212; --card-bg: #1e1e1e; --text-main: #ffffff; --text-muted: #888888;
-            --accent: #a3e635; --accent-orange: #f97316; --accent-red: #ef4444; --accent-blue: #3b82f6; --border: #333333;
+            --bg-color: #0f0f0f; --card-bg: rgba(30, 30, 30, 0.7); --text-main: #ffffff; --text-muted: #a1a1aa;
+            --accent: #a3e635; --accent-orange: #f97316; --accent-red: #ef4444; --accent-blue: #3b82f6; --border: rgba(255,255,255,0.1);
+            --glass-blur: blur(20px);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
@@ -21,158 +22,195 @@
             height: 100dvh; overflow: hidden; overscroll-behavior: none; 
         }
 
+        /* --- ЗАГРУЗОЧНЫЙ ЭКРАН --- */
+        #splash-screen {
+            position: absolute; inset: 0; background: #000; z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        #splash-screen.hidden { opacity: 0; transform: scale(1.1); pointer-events: none; }
+        .splash-img { width: 85%; max-width: 320px; border-radius: 20px; box-shadow: 0 20px 40px rgba(163, 230, 53, 0.15); margin-bottom: 30px; }
+        .spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
         .app-container {
-            width: 100%; height: 100%; 
-            background-color: var(--bg-color); display: flex; flex-direction: column; position: relative; max-width: 480px; 
+            width: 100%; height: 100%; background: var(--bg-color); display: flex; flex-direction: column; position: relative; max-width: 480px; 
             padding-top: env(safe-area-inset-top);
+            background: radial-gradient(circle at top left, #1a1a1a 0%, #0f0f0f 100%);
         }
 
         @media (min-width: 768px) {
-            .app-container { height: 90dvh; margin-top: 5dvh; border-radius: 24px; border: 1px solid var(--border); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); padding-top: 0;}
-            body { background: radial-gradient(circle at center, #222 0%, #000 100%); }
+            .app-container { height: 90dvh; margin-top: 5dvh; border-radius: 32px; border: 1px solid var(--border); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); padding-top: 0;}
+            body { background: #000; }
         }
 
         header {
             padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;
-            background-color: var(--bg-color); border-bottom: 1px solid var(--border); z-index: 10;
+            background: rgba(15, 15, 15, 0.8); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+            border-bottom: 1px solid var(--border); z-index: 10; position: sticky; top: 0;
         }
         h1 { font-size: 20px; font-weight: 900; font-style: italic; letter-spacing: -0.5px; text-transform: uppercase; line-height: 1.1; }
         .accent-text { color: var(--accent); }
         .subtitle { font-size: 11px; color: var(--text-muted); margin-top: 2px;}
-        .avatar-btn { background: #333; color: white; border: 1px solid #444; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 12px; cursor: pointer; transition: 0.2s;}
-        .avatar-btn:active { background: #444; transform: scale(0.95); }
+        .avatar-btn { background: rgba(255,255,255,0.1); color: white; border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 12px; cursor: pointer; transition: 0.2s;}
+        .avatar-btn:active { background: rgba(255,255,255,0.2); transform: scale(0.95); }
 
-        main { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: calc(80px + env(safe-area-inset-bottom)); -webkit-overflow-scrolling: touch; }
+        main { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: calc(100px + env(safe-area-inset-bottom)); -webkit-overflow-scrolling: touch; }
         
-        @keyframes slideInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes popIn { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
-        @keyframes modalFadeIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-        @keyframes slideUp { from { bottom: -100px; } to { bottom: 0; } }
+        /* --- ПЛАВНЫЕ АНИМАЦИИ (iOS Style) --- */
+        @keyframes slideFadeIn { from { opacity: 0; transform: translateY(20px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes popIn { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        @keyframes modalSlideUp { from { opacity: 0; transform: translateY(100%); } to { opacity: 1; transform: translateY(0); } }
 
         section { display: none; }
-        section.active { display: block; animation: slideInRight 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        section.active { display: block; animation: slideFadeIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
 
-        .card { background: var(--card-bg); border-radius: 16px; padding: 16px; margin-bottom: 16px; border: 1px solid var(--border); }
+        /* Стеклянные карточки */
+        .card { 
+            background: var(--card-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+            border-radius: 20px; padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
 
         /* Онбординг */
         .ob-step { display: none; }
-        .ob-step.active { display: block; animation: slideInRight 0.3s ease; }
-        .ob-option { background: #222; border: 1px solid #444; padding: 12px 16px; border-radius: 12px; margin-bottom: 8px; cursor: pointer; transition: 0.2s; font-size: 16px;}
-        .ob-option:active, .ob-option.selected { background: var(--accent); color: #000; border-color: var(--accent); font-weight: bold; transform: scale(0.98); }
-        .ob-progress { height: 4px; background: #333; border-radius: 2px; margin-bottom: 20px; overflow: hidden; }
+        .ob-step.active { display: block; animation: slideFadeIn 0.3s ease; }
+        .ob-option { background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 16px; border-radius: 16px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; font-size: 16px;}
+        .ob-option:active, .ob-option.selected { background: var(--accent); color: #000; border-color: var(--accent); font-weight: bold; transform: scale(0.97); }
+        .ob-progress { height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-bottom: 24px; overflow: hidden; }
         .ob-progress-fill { height: 100%; background: var(--accent); transition: width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); width: 0%; }
         
-        .name-input { width: 100%; background: #111; border: 2px solid #444; border-radius: 12px; padding: 16px; color: white; font-size: 18px; outline: none; margin-bottom: 20px; text-align: center; transition: 0.3s;}
-        .name-input:focus { border-color: var(--accent); box-shadow: 0 0 15px rgba(163, 230, 53, 0.2); }
+        .name-input { width: 100%; background: rgba(0,0,0,0.5); border: 2px solid var(--border); border-radius: 16px; padding: 18px; color: white; font-size: 18px; outline: none; margin-bottom: 20px; text-align: center; transition: 0.3s;}
+        .name-input:focus { border-color: var(--accent); box-shadow: 0 0 20px rgba(163, 230, 53, 0.2); }
 
-        /* Главная: Восстановление и Кольца */
-        .recovery-card { display: flex; flex-direction: column; gap: 12px; align-items: center; }
-        .anatomy-container { display: flex; gap: 10px; justify-content: center; width: 100%; }
-        .heatmap-svg { width: 120px; height: 220px; background: #151515; border-radius: 12px; border: 1px solid #222; padding: 10px;}
-        .muscle-path { stroke: #111; stroke-width: 1; stroke-linejoin: round; transition: fill 0.4s ease; }
+        /* Главная */
+        .recovery-card { display: flex; flex-direction: column; gap: 16px; align-items: center; }
+        .anatomy-container { display: flex; gap: 12px; justify-content: center; width: 100%; padding: 10px 0;}
+        .heatmap-svg { width: 120px; height: 240px; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.6)); }
+        .body-base { fill: #151515; stroke: #333; stroke-width: 1.5; stroke-linejoin: round; }
+        .muscle-group { transition: fill 0.4s ease; stroke: #0f0f0f; stroke-width: 0.5; stroke-linejoin: round;}
         
         .recovery-info { width: 100%; }
-        .recovery-list { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; font-size: 11px; justify-items: center;}
-        .recovery-item { display: flex; align-items: center; gap: 4px; }
-        .dot { width: 8px; height: 8px; border-radius: 50%; transition: 0.3s;}
-        .dot.green { background: var(--accent); }
-        .dot.yellow { background: var(--accent-orange); }
-        .dot.red { background: var(--accent-red); }
+        .recovery-list { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; font-size: 12px; justify-items: center;}
+        .recovery-item { display: flex; align-items: center; gap: 6px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; transition: 0.3s; box-shadow: 0 0 10px rgba(0,0,0,0.5);}
+        .dot.green { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+        .dot.yellow { background: var(--accent-orange); box-shadow: 0 0 10px var(--accent-orange); }
+        .dot.red { background: var(--accent-red); box-shadow: 0 0 10px var(--accent-red); }
         .dot.gray { background: #444; }
 
-        /* Кольца активности */
+        /* Кольца */
         .rings-container { display: flex; justify-content: space-around; align-items: center; height: 120px; width: 100%; }
         .ring-box { position: relative; width: 100px; height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .ring-svg { width: 90px; height: 90px; transform: rotate(-90deg); overflow: visible; }
-        .ring-bg { fill: none; stroke: #2a2a2a; stroke-width: 8; }
-        .ring-fill { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        .ring-val { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 16px; font-weight: 900; color: #fff; }
-        .ring-label { position: absolute; bottom: -10px; font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;}
+        .ring-svg { width: 90px; height: 90px; transform: rotate(-90deg); overflow: visible; filter: drop-shadow(0 0 8px rgba(0,0,0,0.5)); }
+        .ring-bg { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 10; }
+        .ring-fill { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 1s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .ring-val { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 18px; font-weight: 900; color: #fff; }
+        .ring-label { position: absolute; bottom: -12px; font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;}
 
         /* Тренировка */
-        .workout-selector { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 20px; padding-bottom: 4px; scrollbar-width: none; }
+        .workout-selector { display: flex; gap: 10px; overflow-x: auto; margin-bottom: 20px; padding-bottom: 4px; scrollbar-width: none; }
         .workout-selector::-webkit-scrollbar { display: none; }
-        .w-tab { padding: 8px 16px; background: #222; border: 1px solid #333; border-radius: 20px; color: #888; font-weight: bold; font-size: 14px; white-space: nowrap; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center;}
-        .w-tab.active { background: var(--accent); color: #000; border-color: var(--accent); }
-        .w-tab small { font-size: 10px; font-weight: normal; opacity: 0.8;}
+        .w-tab { padding: 10px 20px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 24px; color: var(--text-muted); font-weight: bold; font-size: 14px; white-space: nowrap; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center;}
+        .w-tab.active { background: var(--accent); color: #000; border-color: var(--accent); box-shadow: 0 4px 15px rgba(163, 230, 53, 0.3); transform: translateY(-2px);}
+        .w-tab small { font-size: 11px; font-weight: normal; opacity: 0.8;}
 
-        .timer-box { display: flex; justify-content: space-between; align-items: center; background: #222; border: 1px solid #444; padding: 12px 16px; border-radius: 12px; margin-bottom: 20px; }
-        .timer-display { font-family: monospace; font-size: 20px; font-weight: bold; color: var(--accent-orange); }
-        .timer-btn { background: var(--accent-orange); color: white; border: none; padding: 6px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s;}
+        .timer-box { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.4); border: 1px solid var(--border); padding: 16px 20px; border-radius: 16px; margin-bottom: 20px; }
+        .timer-display { font-family: monospace; font-size: 24px; font-weight: bold; color: var(--accent-orange); text-shadow: 0 0 10px rgba(249, 115, 22, 0.3);}
+        .timer-btn { background: var(--accent-orange); color: white; border: none; padding: 8px 16px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s;}
         .timer-btn:active { transform: scale(0.95); }
 
-        .exercise-card-anim { opacity: 0; animation: fadeInUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-
-        .set-row { display: flex; align-items: center; justify-content: space-between; background: #111; padding: 8px; border-radius: 8px; margin-bottom: 8px; position: relative; overflow: hidden; transition: 0.2s;}
-        .set-num { color: var(--text-muted); font-size: 14px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; text-align: center; border-radius: 4px; cursor: pointer; font-weight: bold; border: 1px solid #333; transition: 0.2s;}
+        .set-row { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; margin-bottom: 10px; position: relative; overflow: hidden; transition: 0.2s; border: 1px solid transparent;}
+        .set-row:focus-within { border-color: var(--border); background: rgba(0,0,0,0.5); }
+        
+        .set-num { color: var(--text-muted); font-size: 14px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; text-align: center; border-radius: 8px; cursor: pointer; font-weight: bold; border: 1px solid var(--border); transition: 0.2s;}
         .set-row.tag-warmup .set-num { background: #555; color: #ccc; border-color: #555; }
         .set-row.tag-failure .set-num { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); border-color: var(--accent-red); }
         .set-row.tag-drop .set-num { background: rgba(249, 115, 22, 0.2); color: var(--accent-orange); border-color: var(--accent-orange); }
         .set-row.tag-warmup { opacity: 0.6; }
 
-        .set-input { background: transparent; border: none; border-bottom: 1px solid #444; color: white; font-weight: bold; font-size: 16px; text-align: center; width: 60px; padding: 4px; outline: none; -webkit-appearance: none; margin: 0; transition: 0.2s;}
+        .set-input { background: transparent; border: none; border-bottom: 2px solid var(--border); color: white; font-weight: bold; font-size: 16px; text-align: center; width: 65px; padding: 4px; outline: none; -webkit-appearance: none; margin: 0; transition: 0.2s;}
         .set-input:focus { border-bottom-color: var(--accent); }
         
-        .btn-check { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #555; background: transparent; color: transparent; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; transition: 0.2s; }
-        .btn-check.done { background: var(--accent); border-color: var(--accent); color: #000; animation: popIn 0.3s ease; }
+        .btn-check { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--border); background: transparent; color: transparent; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: 0.2s; }
+        .btn-check.done { background: var(--accent); border-color: var(--accent); color: #000; animation: popIn 0.3s ease; box-shadow: 0 0 15px rgba(163, 230, 53, 0.4); }
 
-        .ex-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .ex-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
         .ex-title { font-size: 18px; font-weight: bold; }
-        .ex-target { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
-        .ex-history { font-size: 11px; color: var(--accent); font-style: italic; margin-bottom: 12px; display: block; }
-        .action-btn { background: #333; border: 1px solid #444; color: var(--accent); width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; transition: 0.2s; }
+        .ex-target { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+        .ex-history { font-size: 12px; color: var(--accent); font-style: italic; margin-bottom: 12px; display: block; background: rgba(163, 230, 53, 0.1); padding: 4px 8px; border-radius: 6px; width: fit-content;}
+        .action-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text-main); width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; transition: 0.2s; }
         .action-btn:active { background: var(--accent); color: #000; transform: scale(0.9); }
 
-        /* Таймер отдыха (скрыт по умолчанию) */
-        #rest-timer-bar { display: none; position: absolute; bottom: 0; left: 0; width: 100%; background: var(--accent-orange); color: white; padding: 12px 20px; justify-content: space-between; align-items: center; z-index: 50; border-radius: 16px 16px 0 0; box-shadow: 0 -5px 15px rgba(0,0,0,0.5); }
-        #rest-timer-bar.active { display: flex; animation: slideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-        .rest-time { font-size: 24px; font-weight: 900; font-family: monospace; }
+        /* Таймер отдыха (Floating) */
+        #rest-timer-bar { display: none; position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(100px); width: 90%; background: rgba(249, 115, 22, 0.95); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); color: white; padding: 16px 24px; justify-content: space-between; align-items: center; z-index: 50; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); opacity: 0; transition: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        #rest-timer-bar.active { display: flex; transform: translateX(-50%) translateY(0); opacity: 1; }
+        .rest-time { font-size: 28px; font-weight: 900; font-family: monospace; }
 
         /* Статистика */
-        .chart-container { height: 150px; display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; padding-top: 20px; border-bottom: 2px solid #333; border-left: 2px solid #333; margin-bottom: 20px; position: relative;}
-        .chart-bar { flex: 1; background: var(--accent); border-radius: 4px 4px 0 0; position: relative; min-height: 5px; transition: height 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        .chart-value { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; font-weight: bold; color: white; }
-        .chart-label { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #888; }
+        .chart-container { height: 160px; display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; padding-top: 20px; border-bottom: 2px solid var(--border); border-left: 2px solid var(--border); margin-bottom: 20px; position: relative;}
+        .chart-bar { flex: 1; background: linear-gradient(to top, var(--accent-orange), var(--accent)); border-radius: 6px 6px 0 0; position: relative; min-height: 5px; transition: height 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 0 10px rgba(163, 230, 53, 0.2);}
+        .chart-value { position: absolute; top: -24px; left: 50%; transform: translateX(-50%); font-size: 12px; font-weight: bold; color: white; }
+        .chart-label { position: absolute; bottom: -24px; left: 50%; transform: translateX(-50%); font-size: 11px; color: var(--text-muted); }
 
-        .btn { width: 100%; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 16px; border: none; cursor: pointer; transition: transform 0.1s, box-shadow 0.2s; display: flex; justify-content: center; align-items: center; -webkit-appearance: none;}
-        .btn:active { transform: scale(0.96); box-shadow: 0 0 20px rgba(163, 230, 53, 0.3); }
-        .btn-primary { background: var(--accent); color: #000; }
-        .btn-outline { background: transparent; border: 2px dashed #555; color: var(--text-muted); margin-top: 10px;}
+        .btn { width: 100%; padding: 16px; border-radius: 16px; font-weight: bold; font-size: 16px; border: none; cursor: pointer; transition: transform 0.1s, box-shadow 0.3s; display: flex; justify-content: center; align-items: center; -webkit-appearance: none;}
+        .btn:active { transform: scale(0.96); }
+        .btn-primary { background: var(--accent); color: #000; box-shadow: 0 8px 25px rgba(163, 230, 53, 0.3); }
+        .btn-outline { background: transparent; border: 2px dashed var(--border); color: var(--text-muted); margin-top: 10px;}
+        .btn:active.btn-primary { box-shadow: 0 4px 15px rgba(163, 230, 53, 0.5); }
 
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .stat-card { text-align: center; padding: 20px 10px; }
-        .stat-val { font-size: 28px; font-weight: 900; transition: 0.3s;}
-        .stat-lbl { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
-        .food-btn { text-align: left; padding: 12px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; color: white; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 10px; -webkit-appearance: none;}
-        .food-btn:active { background: #2a2a2a; transform: scale(0.97); }
-        .food-title { font-weight: bold; font-size: 13px; line-height: 1.2; }
-        .food-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-
-        .progress-bg { background: #333; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
-        .progress-fill { height: 100%; border-radius: 4px; transition: width 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        .fill-kcal { background: var(--accent-orange); width: 0%; }
-        .fill-protein { background: var(--accent); width: 0%; }
-
-        .search-box, .modal-input { width: 100%; background: #1e1e1e; border: 1px solid #333; border-radius: 12px; padding: 12px 16px; color: white; font-size: 16px; outline: none; -webkit-appearance: none; transition: 0.3s;}
-        .search-box { margin-bottom: 16px; }
-        .modal-input { margin-bottom: 12px; background: #111; border: 1px solid #444;}
-        .search-box:focus, .modal-input:focus { border-color: var(--accent); box-shadow: 0 0 10px rgba(163, 230, 53, 0.2); }
-
-        nav { position: absolute; bottom: 0; width: 100%; background: #1a1a1a; border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); z-index: 40; }
-        .nav-item { flex: 1; padding: 12px 0; display: flex; flex-direction: column; align-items: center; background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 10px; font-weight: bold; gap: 4px; -webkit-appearance: none; transition: 0.2s;}
-        .nav-item.active { color: var(--accent); }
-        .nav-icon { font-size: 20px; line-height: 1; transition: transform 0.2s;}
-        .nav-item.active .nav-icon { transform: translateY(-2px); }
-
-        .modal { position: absolute; inset: 0; background: rgba(0,0,0,0.9); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 100; }
-        .modal.active { display: flex; }
-        .modal-content { background: var(--card-bg); padding: 24px; border-radius: 20px; width: 100%; max-width: 400px; border: 1px solid var(--accent); max-height: 90vh; overflow-y: auto; animation: modalFadeIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .stat-card { text-align: center; padding: 24px 10px; }
+        .stat-val { font-size: 32px; font-weight: 900; transition: 0.3s; text-shadow: 0 0 20px rgba(255,255,255,0.1);}
+        .stat-lbl { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
         
+        .food-btn { text-align: left; padding: 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 16px; color: white; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 12px; -webkit-appearance: none;}
+        .food-btn:active { background: rgba(255,255,255,0.1); transform: scale(0.97); }
+        .food-title { font-weight: bold; font-size: 14px; line-height: 1.2; }
+        .food-desc { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+        .progress-bg { background: rgba(255,255,255,0.1); height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 16px; }
+        .progress-fill { height: 100%; border-radius: 5px; transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .fill-kcal { background: linear-gradient(90deg, #ef4444, #f97316); width: 0%; box-shadow: 0 0 10px rgba(249, 115, 22, 0.5); }
+        .fill-protein { background: linear-gradient(90deg, #84cc16, #a3e635); width: 0%; box-shadow: 0 0 10px rgba(163, 230, 53, 0.5); }
+
+        .search-box, .modal-input { width: 100%; background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 14px; padding: 14px 18px; color: white; font-size: 16px; outline: none; -webkit-appearance: none; transition: 0.3s;}
+        .search-box { margin-bottom: 20px; }
+        .modal-input { margin-bottom: 16px; }
+        .search-box:focus, .modal-input:focus { border-color: var(--accent); box-shadow: 0 0 15px rgba(163, 230, 53, 0.1); }
+
+        /* Нижнее меню (Glass) */
+        nav { 
+            position: absolute; bottom: 0; width: 100%; 
+            background: rgba(15, 15, 15, 0.85); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+            border-top: 1px solid var(--border); display: flex; justify-content: space-around; 
+            padding-bottom: env(safe-area-inset-bottom); z-index: 40; 
+        }
+        .nav-item { flex: 1; padding: 14px 0; display: flex; flex-direction: column; align-items: center; background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 11px; font-weight: bold; gap: 6px; -webkit-appearance: none; transition: 0.2s;}
+        .nav-item.active { color: var(--accent); }
+        .nav-icon { font-size: 22px; line-height: 1; transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);}
+        .nav-item.active .nav-icon { transform: translateY(-4px) scale(1.1); }
+
+        /* Модалки (Bottom Sheet Style) */
+        .modal { position: absolute; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: none; align-items: flex-end; justify-content: center; z-index: 100; }
+        .modal.active { display: flex; }
+        .modal-content { 
+            background: #1a1a1a; padding: 32px 24px; border-radius: 32px 32px 0 0; width: 100%; max-width: 480px; border: 1px solid var(--border); border-bottom: none;
+            max-height: 90vh; overflow-y: auto; animation: modalSlideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            padding-bottom: calc(32px + env(safe-area-inset-bottom));
+        }
+        
+        /* Скрытие скроллбаров */
+        ::-webkit-scrollbar { display: none; }
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
 <body>
+
+    <!-- ЗАГРУЗОЧНЫЙ ЭКРАН -->
+    <div id="splash-screen">
+        <img src="splash-cat.jpg" alt="Кто сдох, тот лох" class="splash-img" onerror="this.style.display='none'">
+        <div class="spinner"></div>
+    </div>
 
     <div class="app-container">
         <header>
@@ -187,29 +225,29 @@
             <!-- ЭКРАН 0: ОНБОРДИНГ -->
             <section id="view-onboarding" class="active">
                 <div class="ob-progress"><div class="ob-progress-fill" id="ob-progress-bar"></div></div>
-                <div class="ob-step active" id="ob-step-1"><h2 style="margin-bottom: 16px;">Как тебя зовут?</h2><input type="text" id="ob-name" class="name-input" placeholder="Твое имя" oninput="checkName()"></div>
-                <div class="ob-step" id="ob-step-2"><h2 style="margin-bottom: 16px;">Твой вес (кг)</h2><input type="number" id="ob-weight" class="name-input" placeholder="Например, 75" oninput="checkWeight()"></div>
+                <div class="ob-step active" id="ob-step-1"><h2 style="margin-bottom: 20px;">Как тебя зовут?</h2><input type="text" id="ob-name" class="name-input" placeholder="Твое имя" oninput="checkName()"></div>
+                <div class="ob-step" id="ob-step-2"><h2 style="margin-bottom: 20px;">Твой вес (кг)</h2><input type="number" id="ob-weight" class="name-input" placeholder="Например, 75" oninput="checkWeight()"></div>
                 <div class="ob-step" id="ob-step-3">
-                    <h2 style="margin-bottom: 16px;">Твой возраст</h2>
+                    <h2 style="margin-bottom: 20px;">Твой возраст</h2>
                     <div class="ob-option" onclick="selectOb('age', '18-25', this)">18–25 лет</div>
                     <div class="ob-option" onclick="selectOb('age', '26-35', this)">26–35 лет</div>
                     <div class="ob-option" onclick="selectOb('age', '36-45', this)">36–45 лет</div>
                     <div class="ob-option" onclick="selectOb('age', '45+', this)">Старше 45 лет</div>
                 </div>
                 <div class="ob-step" id="ob-step-4">
-                    <h2 style="margin-bottom: 16px;">Опыт тренировок</h2>
+                    <h2 style="margin-bottom: 20px;">Опыт тренировок</h2>
                     <div class="ob-option" onclick="selectOb('exp', 'beginner', this)">Новичок (до 1 года)</div>
                     <div class="ob-option" onclick="selectOb('exp', 'intermediate', this)">Средний (1–3 года)</div>
                     <div class="ob-option" onclick="selectOb('exp', 'advanced', this)">Продвинутый (3+ года)</div>
                 </div>
                 <div class="ob-step" id="ob-step-5">
-                    <h2 style="margin-bottom: 16px;">Главная цель</h2>
+                    <h2 style="margin-bottom: 20px;">Главная цель</h2>
                     <div class="ob-option" onclick="selectOb('goal', 'mass', this)">Набор массы и силы</div>
                     <div class="ob-option" onclick="selectOb('goal', 'fatloss', this)">Жиросжигание и тонус</div>
                     <div class="ob-option" onclick="selectOb('goal', 'health', this)">Здоровье и поддержка</div>
                 </div>
                 <div class="ob-step" id="ob-step-6">
-                    <h2 style="margin-bottom: 16px;">Дней в неделю</h2>
+                    <h2 style="margin-bottom: 20px;">Дней в неделю</h2>
                     <div class="ob-option" onclick="selectOb('days', '2', this)">2 дня (Фулбоди)</div>
                     <div class="ob-option" onclick="selectOb('days', '3', this)">3 дня (PPL / Фулбоди)</div>
                     <div class="ob-option" onclick="selectOb('days', '4', this)">4 дня (Верх/Низ)</div>
@@ -220,62 +258,66 @@
 
             <!-- ЭКРАН 1: ГЛАВНАЯ -->
             <section id="view-dashboard">
-                <!-- КОЛЬЦА АКТИВНОСТИ -->
                 <div class="card">
-                    <h3 style="font-size: 16px; margin-bottom: 12px;">Прогресс за неделю</h3>
+                    <h3 style="font-size: 18px; margin-bottom: 16px;">Прогресс за неделю</h3>
                     <div class="rings-container" id="rings-container"></div>
                 </div>
 
-                <!-- ТЕПЛОВАЯ КАРТА (ВИД СПЕРЕДИ И СЗАДИ) -->
                 <div class="card">
-                    <h3 style="font-size: 16px; margin-bottom: 12px;">Восстановление мышц</h3>
+                    <h3 style="font-size: 18px; margin-bottom: 16px;">Восстановление</h3>
                     <div class="recovery-card">
                         <div class="anatomy-container">
                             <!-- Вид спереди -->
                             <svg class="heatmap-svg" viewBox="0 0 100 200" xmlns="http://www.w3.org/2000/svg">
-                                <!-- Контур -->
-                                <path d="M 45 15 C 48 10 52 10 55 15 L 60 25 L 72 30 L 80 50 L 78 80 L 72 90 L 75 130 L 72 180 L 58 180 L 52 130 L 50 115 L 48 130 L 42 180 L 28 180 L 25 130 L 28 90 L 22 80 L 20 50 L 28 30 L 40 25 Z" fill="#151515" stroke="#333" stroke-width="1.5" />
-                                
-                                <!-- Мышцы -->
-                                <path id="m-shoulders-front" class="muscle-path" d="M 24 35 Q 30 28 35 35 L 32 45 Z M 76 35 Q 70 28 65 35 L 68 45 Z" fill="#444" />
-                                <path id="m-chest" class="muscle-path" d="M 35 38 Q 50 35 65 38 L 60 55 Q 50 58 40 55 Z" fill="#444" />
-                                <path id="m-abs" class="muscle-path" d="M 42 60 L 58 60 L 56 95 L 50 100 L 44 95 Z" fill="#444" />
-                                <path id="m-obliques" class="muscle-path" d="M 35 60 L 41 60 L 43 95 L 33 90 Z M 65 60 L 59 60 L 57 95 L 67 90 Z" fill="#444" />
-                                <path id="m-biceps" class="muscle-path" d="M 22 50 L 30 50 L 28 75 L 20 70 Z M 78 50 L 70 50 L 72 75 L 80 70 Z" fill="#444" />
-                                <path id="m-quads" class="muscle-path" d="M 32 105 L 46 105 L 44 150 L 30 145 Z M 68 105 L 54 105 L 56 150 L 70 145 Z" fill="#444" />
-                                <path id="m-calves-front" class="muscle-path" d="M 30 155 L 42 155 L 38 175 L 28 175 Z M 70 155 L 58 155 L 62 175 L 72 175 Z" fill="#444" />
+                                <defs>
+                                    <radialGradient id="muscle-grad-front" cx="50%" cy="50%" r="50%">
+                                        <stop offset="0%" stop-color="#d97706"/>
+                                        <stop offset="100%" stop-color="#7c2d12"/>
+                                    </radialGradient>
+                                </defs>
+                                <path class="body-base" d="M 45 15 C 48 10 52 10 55 15 L 60 25 L 72 30 L 80 50 L 78 80 L 72 90 L 75 130 L 72 180 L 58 180 L 52 130 L 50 115 L 48 130 L 42 180 L 28 180 L 25 130 L 28 90 L 22 80 L 20 50 L 28 30 L 40 25 Z" />
+                                <path id="m-shoulders-front" class="muscle-group" d="M 24 35 Q 30 20 38 30 L 32 45 Z M 76 35 Q 70 20 62 30 L 68 45 Z" fill="url(#muscle-grad-front)" />
+                                <path id="m-chest" class="muscle-group" d="M 35 35 C 40 32 60 32 65 35 C 68 50 55 58 50 58 C 45 58 32 50 35 35 Z" fill="url(#muscle-grad-front)" />
+                                <path id="m-abs" class="muscle-group" d="M 42 60 C 45 60 55 60 58 60 C 58 80 55 95 50 100 C 45 95 42 80 42 60 Z" fill="url(#muscle-grad-front)" />
+                                <path id="m-obliques" class="muscle-group" d="M 35 60 L 41 60 L 43 95 L 33 90 Z M 65 60 L 59 60 L 57 95 L 67 90 Z" fill="url(#muscle-grad-front)" />
+                                <path id="m-biceps" class="muscle-group" d="M 22 50 C 30 45 30 75 20 70 Z M 78 50 C 70 45 70 75 80 70 Z" fill="url(#muscle-grad-front)" />
+                                <path id="m-quads" class="muscle-group" d="M 32 105 C 45 105 48 140 44 150 L 30 145 Z M 68 105 C 55 105 52 140 56 150 L 70 145 Z" fill="url(#muscle-grad-front)" />
+                                <path id="m-calves-front" class="muscle-group" d="M 30 155 L 42 155 L 38 175 L 28 175 Z M 70 155 L 58 155 L 62 175 L 72 175 Z" fill="url(#muscle-grad-front)" />
                             </svg>
                             
                             <!-- Вид сзади -->
                             <svg class="heatmap-svg" viewBox="0 0 100 200" xmlns="http://www.w3.org/2000/svg">
-                                <!-- Контур -->
-                                <path d="M 45 15 C 48 10 52 10 55 15 L 60 25 L 72 30 L 80 50 L 78 80 L 72 90 L 75 130 L 72 180 L 58 180 L 52 130 L 50 115 L 48 130 L 42 180 L 28 180 L 25 130 L 28 90 L 22 80 L 20 50 L 28 30 L 40 25 Z" fill="#151515" stroke="#333" stroke-width="1.5" />
-                                
-                                <!-- Мышцы -->
-                                <path id="m-traps" class="muscle-path" d="M 35 25 L 65 25 L 55 45 L 45 45 Z" fill="#444" />
-                                <path id="m-lats" class="muscle-path" d="M 28 45 L 45 45 L 45 85 L 25 80 Z M 72 45 L 55 45 L 55 85 L 75 80 Z" fill="#444" />
-                                <path id="m-shoulders-back" class="muscle-path" d="M 24 35 Q 30 28 35 35 L 32 45 Z M 76 35 Q 70 28 65 35 L 68 45 Z" fill="#444" />
-                                <path id="m-triceps" class="muscle-path" d="M 20 50 L 26 50 L 24 75 L 18 70 Z M 80 50 L 74 50 L 76 75 L 82 70 Z" fill="#444" />
-                                <path id="m-lower-back" class="muscle-path" d="M 40 85 L 60 85 L 58 105 L 42 105 Z" fill="#444" />
-                                <path id="m-glutes" class="muscle-path" d="M 35 105 Q 50 100 65 105 L 60 130 L 50 125 L 40 130 Z" fill="#444" />
-                                <path id="m-hamstrings" class="muscle-path" d="M 35 130 L 46 130 L 44 155 L 32 150 Z M 65 130 L 54 130 L 56 155 L 68 150 Z" fill="#444" />
-                                <path id="m-calves-back" class="muscle-path" d="M 30 155 L 42 155 L 38 175 L 28 175 Z M 70 155 L 58 155 L 62 175 L 72 175 Z" fill="#444" />
+                                <defs>
+                                    <radialGradient id="muscle-grad-back" cx="50%" cy="50%" r="50%">
+                                        <stop offset="0%" stop-color="#b45309"/>
+                                        <stop offset="100%" stop-color="#431407"/>
+                                    </radialGradient>
+                                </defs>
+                                <path class="body-base" d="M 45 15 C 48 10 52 10 55 15 L 60 25 L 72 30 L 80 50 L 78 80 L 72 90 L 75 130 L 72 180 L 58 180 L 52 130 L 50 115 L 48 130 L 42 180 L 28 180 L 25 130 L 28 90 L 22 80 L 20 50 L 28 30 L 40 25 Z" />
+                                <path id="m-traps" class="muscle-group" d="M 35 25 L 65 25 L 55 45 L 45 45 Z" fill="url(#muscle-grad-back)" />
+                                <path id="m-lats" class="muscle-group" d="M 28 45 L 45 45 L 45 85 L 25 80 Z M 72 45 L 55 45 L 55 85 L 75 80 Z" fill="url(#muscle-grad-back)" />
+                                <path id="m-shoulders-back" class="muscle-group" d="M 24 35 Q 30 20 38 30 L 32 45 Z M 76 35 Q 70 20 62 30 L 68 45 Z" fill="url(#muscle-grad-back)" />
+                                <path id="m-triceps" class="muscle-group" d="M 20 50 C 25 45 25 75 18 70 Z M 80 50 C 75 45 75 75 82 70 Z" fill="url(#muscle-grad-back)" />
+                                <path id="m-lower-back" class="muscle-group" d="M 42 85 L 58 85 L 58 105 L 42 105 Z" fill="url(#muscle-grad-back)" />
+                                <path id="m-glutes" class="muscle-group" d="M 35 105 C 45 100 55 100 65 105 C 60 125 55 130 50 125 C 45 130 40 125 35 105 Z" fill="url(#muscle-grad-back)" />
+                                <path id="m-hamstrings" class="muscle-group" d="M 35 130 L 46 130 L 44 155 L 32 150 Z M 65 130 L 54 130 L 56 155 L 68 150 Z" fill="url(#muscle-grad-back)" />
+                                <path id="m-calves-back" class="muscle-group" d="M 30 155 L 42 155 L 38 175 L 28 175 Z M 70 155 L 58 155 L 62 175 L 72 175 Z" fill="url(#muscle-grad-back)" />
                             </svg>
                         </div>
-                        
                         <div class="recovery-info">
                             <div class="recovery-list" id="recovery-list"></div>
                         </div>
                     </div>
                 </div>
 
-                <h3 style="margin: 24px 0 12px; font-size: 16px;">Тренировка дня</h3>
+                <h3 style="margin: 24px 0 12px; font-size: 18px;">Тренировка дня</h3>
                 <div class="card" style="border-left: 4px solid var(--accent); cursor: pointer;" onclick="switchTab('workout')">
-                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
                             <div class="ex-title" id="dash-workout-name">-</div>
-                            <div class="ex-target">Нажми, чтобы перейти к тренировке</div>
+                            <div class="ex-target">Нажми, чтобы перейти</div>
                         </div>
+                        <div style="font-size: 24px; color: var(--accent);">▶</div>
                     </div>
                 </div>
             </section>
@@ -284,39 +326,37 @@
             <section id="view-workout">
                 <div class="workout-selector" id="workout-tabs"></div>
                 <div class="timer-box">
-                    <div><div style="font-size: 12px; color: #888;">Длительность</div><div class="timer-display" id="timer-display">00:00</div></div>
+                    <div><div style="font-size: 13px; color: var(--text-muted); text-transform: uppercase; font-weight: bold;">Длительность</div><div class="timer-display" id="timer-display">00:00</div></div>
                     <button class="timer-btn" id="timer-btn" onclick="toggleTimer()">Старт</button>
                 </div>
                 <div id="exercise-container"></div>
                 <button class="btn btn-outline" onclick="openModal('modal-add-ex')">+ Свое упражнение</button>
-                <button class="btn btn-primary" style="margin-top: 24px;" onclick="saveWorkoutToHistory()">Завершить тренировку</button>
+                <button class="btn btn-primary" style="margin-top: 24px;" onclick="saveWorkoutToHistory()">Завершить</button>
             </section>
 
             <!-- ЭКРАН 3: ИСТОРИЯ -->
             <section id="view-calendar">
-                <h2 style="font-size: 20px; margin-bottom: 20px;">История тренировок</h2>
+                <h2 style="font-size: 24px; margin-bottom: 24px; font-weight: 900;">История</h2>
                 <div id="history-container"></div>
             </section>
 
             <!-- ЭКРАН 4: СТАТИСТИКА -->
             <section id="view-stats">
-                <h2 style="font-size: 20px; margin-bottom: 20px;">Статистика</h2>
+                <h2 style="font-size: 24px; margin-bottom: 24px; font-weight: 900;">Статистика</h2>
                 <div class="card">
-                    <h3 style="font-size: 14px; color: #888; margin-bottom: 12px;">Выбери упражнение для графика</h3>
-                    <select id="stats-exercise" style="width: 100%; padding: 12px; background: #111; color: white; border: 1px solid #333; border-radius: 8px; margin-bottom: 20px;" onchange="renderChart()">
+                    <select id="stats-exercise" style="width: 100%; padding: 14px; background: rgba(0,0,0,0.5); color: white; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 20px; font-size: 16px; outline: none;" onchange="renderChart()">
                         <option value="Жим штанги лежа">Жим штанги лежа</option>
                         <option value="Присед со штангой">Присед со штангой</option>
                         <option value="Становая тяга">Становая тяга</option>
                         <option value="Подтягивания">Подтягивания</option>
                     </select>
                     <div class="chart-container" id="chart-container"></div>
-                    <div style="text-align: center; font-size: 12px; color: var(--text-muted);">График максимального веса (кг)</div>
                 </div>
             </section>
 
             <!-- ЭКРАН 5: ПИТАНИЕ -->
             <section id="view-nutrition">
-                <h2 style="font-size: 20px; margin-bottom: 20px;">Питание</h2>
+                <h2 style="font-size: 24px; margin-bottom: 24px; font-weight: 900;">Питание</h2>
                 <div class="grid-2" style="margin-bottom: 24px;">
                     <div class="card stat-card"><div id="main-kcal" class="stat-val" style="color: var(--accent-orange);">0</div><div class="stat-lbl">Съедено ккал</div></div>
                     <div class="card stat-card"><div id="main-prot" class="stat-val" style="color: var(--accent);">0</div><div class="stat-lbl">Белок (г)</div></div>
@@ -326,12 +366,14 @@
             </section>
         </main>
 
+        <!-- Плавающий таймер отдыха -->
         <div id="rest-timer-bar">
-            <div style="font-size: 14px; font-weight: bold;">Отдых</div>
+            <div style="font-size: 14px; font-weight: bold; opacity: 0.9;">ОТДЫХ</div>
             <div class="rest-time" id="rest-timer-display">00:00</div>
-            <button onclick="skipRestTimer()" style="background: transparent; border: 1px solid white; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Пропустить</button>
+            <button onclick="skipRestTimer()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 16px; border-radius: 10px; font-size: 14px; font-weight: bold;">Пропустить</button>
         </div>
 
+        <!-- Навигация -->
         <nav id="main-nav" style="display: none;">
             <button class="nav-item active" id="nav-dashboard" onclick="switchTab('dashboard')"><span class="nav-icon">🏠</span><span>Главная</span></button>
             <button class="nav-item" id="nav-workout" onclick="switchTab('workout')"><span class="nav-icon">🏋️</span><span>Тренировка</span></button>
@@ -340,34 +382,25 @@
             <button class="nav-item" id="nav-nutrition" onclick="switchTab('nutrition')"><span class="nav-icon">🥗</span><span>Питание</span></button>
         </nav>
 
-        <!-- МОДАЛКИ -->
-        <!-- 1. Калькулятор -->
-        <div id="modal-calc" class="modal"><div class="modal-content"><h3 style="margin-bottom: 16px;">Калькулятор 1ПМ</h3><div style="display: flex; gap: 10px;"><input type="number" id="calc-weight" class="modal-input" placeholder="Вес (кг)"><input type="number" id="calc-reps" class="modal-input" placeholder="Повторы"></div><button class="btn btn-primary" onclick="runCalculator()">Рассчитать</button><div id="calc-result" style="display: none; background: #111; padding: 16px; border-radius: 8px; margin-top: 16px;"><div id="calc-1rm" style="font-size: 24px; font-weight: bold; color: var(--accent);"></div><div id="calc-warmup" style="font-size: 14px; margin-top: 8px;"></div></div><button class="btn" style="background: #333; color: white; margin-top: 16px;" onclick="closeModal('modal-calc')">Закрыть</button></div></div>
+        <!-- МОДАЛКИ (Bottom Sheet) -->
+        <div id="modal-calc" class="modal"><div class="modal-content"><div style="width: 40px; height: 4px; background: #333; border-radius: 2px; margin: 0 auto 20px;"></div><h3 style="margin-bottom: 20px; font-size: 22px;">Калькулятор 1ПМ</h3><div style="display: flex; gap: 12px;"><input type="number" id="calc-weight" class="modal-input" placeholder="Вес (кг)"><input type="number" id="calc-reps" class="modal-input" placeholder="Повторы"></div><button class="btn btn-primary" onclick="runCalculator()">Рассчитать</button><div id="calc-result" style="display: none; background: rgba(0,0,0,0.4); padding: 20px; border-radius: 16px; margin-top: 16px;"><div id="calc-1rm" style="font-size: 28px; font-weight: bold; color: var(--accent);"></div><div id="calc-warmup" style="font-size: 15px; margin-top: 12px; color: #ccc; line-height: 1.5;"></div></div><button class="btn" style="background: rgba(255,255,255,0.1); color: white; margin-top: 16px;" onclick="closeModal('modal-calc')">Закрыть</button></div></div>
 
-        <!-- 2. ИНФО ОБ УПРАЖНЕНИИ -->
-        <div id="modal-ex-info" class="modal">
-            <div class="modal-content">
-                <h3 id="info-ex-name" style="margin-bottom: 4px; font-size: 20px;">Упражнение</h3>
-                <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Инвентарь: <span id="info-ex-equip" style="color: white; font-weight: bold;">-</span></div>
-                <button id="info-ex-video-btn" class="btn btn-primary" style="margin-bottom: 10px;">▶ Смотреть технику</button>
-                <button class="btn" style="background: #333; color: white;" onclick="closeModal('modal-ex-info')">Закрыть</button>
-            </div>
-        </div>
+        <div id="modal-ex-info" class="modal"><div class="modal-content"><div style="width: 40px; height: 4px; background: #333; border-radius: 2px; margin: 0 auto 20px;"></div><h3 id="info-ex-name" style="margin-bottom: 8px; font-size: 24px;">Упражнение</h3><div style="font-size: 15px; color: var(--text-muted); margin-bottom: 24px;">Инвентарь: <span id="info-ex-equip" style="color: white; font-weight: bold;">-</span></div><button id="info-ex-video-btn" class="btn btn-primary" style="margin-bottom: 12px;">▶ Смотреть технику</button><button class="btn" style="background: rgba(255,255,255,0.1); color: white;" onclick="closeModal('modal-ex-info')">Закрыть</button></div></div>
 
-        <!-- 3. Добавить упражнение -->
-        <div id="modal-add-ex" class="modal"><div class="modal-content"><h3 style="margin-bottom: 16px;">Новое упражнение</h3><input type="text" id="add-name" class="modal-input" placeholder="Название"><div style="display: flex; gap: 10px;"><input type="number" id="add-sets" class="modal-input" placeholder="Подходы (4)"><input type="text" id="add-reps" class="modal-input" placeholder="Повторы (6-8)"></div><div style="display: flex; gap: 10px; margin-top: 10px;"><button class="btn" style="background: #333; color: white;" onclick="closeModal('modal-add-ex')">Отмена</button><button class="btn btn-primary" onclick="addCustomExercise()">Добавить</button></div></div></div>
+        <div id="modal-add-ex" class="modal"><div class="modal-content"><div style="width: 40px; height: 4px; background: #333; border-radius: 2px; margin: 0 auto 20px;"></div><h3 style="margin-bottom: 20px; font-size: 22px;">Новое упражнение</h3><input type="text" id="add-name" class="modal-input" placeholder="Название"><div style="display: flex; gap: 12px;"><input type="number" id="add-sets" class="modal-input" placeholder="Подходы (4)"><input type="text" id="add-reps" class="modal-input" placeholder="Повторы (6-8)"></div><div style="display: flex; gap: 12px; margin-top: 12px;"><button class="btn" style="background: rgba(255,255,255,0.1); color: white;" onclick="closeModal('modal-add-ex')">Отмена</button><button class="btn btn-primary" onclick="addCustomExercise()">Добавить</button></div></div></div>
 
-        <!-- 4. Еда -->
-        <div id="modal-food" class="modal"><div class="modal-content"><h3 id="food-modal-title" style="margin-bottom: 16px; font-size: 18px;">Продукт</h3><input type="number" id="food-grams" class="modal-input" value="100" oninput="updateFoodCalc()"><div class="food-calc-box" style="background: #111; padding: 16px; border-radius: 8px; text-align: center; margin-bottom: 16px; display: flex; justify-content: space-around;"><div><div style="font-size: 20px; font-weight: bold; color: var(--accent-orange);" id="food-calc-kcal">0</div><div style="font-size: 12px; color: #666;">ккал</div></div><div><div style="font-size: 20px; font-weight: bold; color: var(--accent);" id="food-calc-prot">0</div><div style="font-size: 12px; color: #666;">белка</div></div></div><div style="display: flex; gap: 10px;"><button class="btn" style="background: #333; color: white;" onclick="closeModal('modal-food')">Отмена</button><button class="btn btn-primary" onclick="confirmAddFood()">Добавить</button></div></div></div>
+        <div id="modal-food" class="modal"><div class="modal-content"><div style="width: 40px; height: 4px; background: #333; border-radius: 2px; margin: 0 auto 20px;"></div><h3 id="food-modal-title" style="margin-bottom: 20px; font-size: 22px;">Продукт</h3><input type="number" id="food-grams" class="modal-input" value="100" oninput="updateFoodCalc()"><div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 20px; display: flex; justify-content: space-around;"><div><div style="font-size: 24px; font-weight: bold; color: var(--accent-orange);" id="food-calc-kcal">0</div><div style="font-size: 13px; color: var(--text-muted);">ккал</div></div><div><div style="font-size: 24px; font-weight: bold; color: var(--accent);" id="food-calc-prot">0</div><div style="font-size: 13px; color: var(--text-muted);">белка</div></div></div><div style="display: flex; gap: 12px;"><button class="btn" style="background: rgba(255,255,255,0.1); color: white;" onclick="closeModal('modal-food')">Отмена</button><button class="btn btn-primary" onclick="confirmAddFood()">Добавить</button></div></div></div>
 
-        <!-- 5. Профиль -->
-        <div id="modal-profile" class="modal"><div class="modal-content"><h3 style="margin-bottom: 16px;">Профиль</h3><div id="profile-details" style="margin-bottom: 20px; font-size: 14px; line-height: 1.6; color: #ccc;"></div><button class="btn" style="background: #ff4444; color: white;" onclick="resetProfile()">Сбросить профиль</button><button class="btn" style="background: #333; color: white; margin-top: 10px;" onclick="closeModal('modal-profile')">Закрыть</button></div></div>
+        <div id="modal-profile" class="modal"><div class="modal-content"><div style="width: 40px; height: 4px; background: #333; border-radius: 2px; margin: 0 auto 20px;"></div><h3 style="margin-bottom: 20px; font-size: 22px;">Профиль</h3><div id="profile-details" style="margin-bottom: 24px; font-size: 15px; line-height: 1.8; color: #ccc;"></div><button class="btn" style="background: rgba(239, 68, 68, 0.2); color: var(--accent-red);" onclick="resetProfile()">Сбросить профиль</button><button class="btn" style="background: rgba(255,255,255,0.1); color: white; margin-top: 12px;" onclick="closeModal('modal-profile')">Закрыть</button></div></div>
     </div>
 
     <script>
-        const foodDatabase = [
-            { id: 'chicken_breast', name: 'Куриная грудка', emoji: '🍗', kcal100: 110, prot100: 23 }, { id: 'chicken_thigh', name: 'Куриное бедро', emoji: '🍗', kcal100: 160, prot100: 18 }, { id: 'turkey', name: 'Индейка', emoji: '🦃', kcal100: 110, prot100: 24 }, { id: 'beef', name: 'Говядина', emoji: '🥩', kcal100: 200, prot100: 26 }, { id: 'veal', name: 'Телятина', emoji: '🥩', kcal100: 150, prot100: 22 }, { id: 'pork', name: 'Свинина', emoji: '🥓', kcal100: 260, prot100: 25 }, { id: 'bacon', name: 'Бекон', emoji: '🥓', kcal100: 540, prot100: 37 }, { id: 'lamb', name: 'Баранина', emoji: '🐑', kcal100: 250, prot100: 22 }, { id: 'duck', name: 'Утка', emoji: '🦆', kcal100: 330, prot100: 19 }, { id: 'ham', name: 'Ветчина', emoji: '🍖', kcal100: 150, prot100: 20 }, { id: 'sausage', name: 'Колбаса вареная', emoji: '🌭', kcal100: 250, prot100: 12 }, { id: 'salami', name: 'Салями', emoji: '🍕', kcal100: 400, prot100: 20 }, { id: 'liver', name: 'Печень куриная', emoji: '🍖', kcal100: 140, prot100: 20 }, { id: 'rabbit', name: 'Кролик', emoji: '🐇', kcal100: 170, prot100: 21 }, { id: 'cod', name: 'Треска', emoji: '🐟', kcal100: 80, prot100: 18 }, { id: 'salmon', name: 'Лосось', emoji: '🍣', kcal100: 200, prot100: 20 }, { id: 'tuna', name: 'Тунец', emoji: '🐟', kcal100: 130, prot100: 23 }, { id: 'mackerel', name: 'Скумбрия', emoji: '🐟', kcal100: 250, prot100: 18 }, { id: 'herring', name: 'Сельдь', emoji: '🐟', kcal100: 250, prot100: 17 }, { id: 'trout', name: 'Форель', emoji: '🐟', kcal100: 140, prot100: 20 }, { id: 'shrimp', name: 'Креветки', emoji: '🍤', kcal100: 100, prot100: 20 }, { id: 'squid', name: 'Кальмар', emoji: '🦑', kcal100: 90, prot100: 15 }, { id: 'crab', name: 'Крабовые палочки', emoji: '🦀', kcal100: 90, prot100: 6 }, { id: 'caviar', name: 'Икра', emoji: '🥫', kcal100: 250, prot100: 25 }, { id: 'mussels', name: 'Мидии', emoji: '🦪', kcal100: 70, prot100: 12 }, { id: 'octopus', name: 'Осьминог', emoji: '🐙', kcal100: 80, prot100: 15 }, { id: 'eggs', name: 'Яйца куриные', emoji: '🥚', kcal100: 155, prot100: 13 }, { id: 'quail_eggs', name: 'Яйца перепелиные', emoji: '🥚', kcal100: 168, prot100: 13 }, { id: 'milk', name: 'Молоко 2.5%', emoji: '🥛', kcal100: 52, prot100: 3 }, { id: 'milk_skim', name: 'Молоко обезжир.', emoji: '🥛', kcal100: 34, prot100: 3 }, { id: 'kefir', name: 'Кефир', emoji: '🥛', kcal100: 40, prot100: 3 }, { id: 'yogurt', name: 'Йогурт натуральный', emoji: '🥛', kcal100: 60, prot100: 5 }, { id: 'yogurt_greek', name: 'Йогурт греческий', emoji: '🥛', kcal100: 90, prot100: 9 }, { id: 'cottage', name: 'Творог 5%', emoji: '🧀', kcal100: 120, prot100: 18 }, { id: 'cottage_0', name: 'Творог обезжир.', emoji: '🧀', kcal100: 80, prot100: 18 }, { id: 'cheese', name: 'Сыр твердый', emoji: '🧀', kcal100: 350, prot100: 25 }, { id: 'mozzarella', name: 'Моцарелла', emoji: '🧀', kcal100: 280, prot100: 22 }, { id: 'sour_cream', name: 'Сметана 20%', emoji: '🥛', kcal100: 200, prot100: 3 }, { id: 'butter', name: 'Масло сливочное', emoji: '🧈', kcal100: 717, prot100: 1 }, { id: 'cream', name: 'Сливки 10%', emoji: '🥛', kcal100: 120, prot100: 3 }, { id: 'tofu', name: 'Тофу', emoji: '🧊', kcal100: 76, prot100: 8 }, { id: 'rice', name: 'Рис отварной', emoji: '🍚', kcal100: 130, prot100: 2.5 }, { id: 'buckwheat', name: 'Гречка отварная', emoji: '🌾', kcal100: 110, prot100: 4 }, { id: 'oats', name: 'Овсянка (сухая)', emoji: '🥣', kcal100: 370, prot100: 13 }, { id: 'pasta', name: 'Макароны отварные', emoji: '🍝', kcal100: 150, prot100: 5 }, { id: 'spaghetti', name: 'Спагетти', emoji: '🍝', kcal100: 160, prot100: 6 }, { id: 'bulgur', name: 'Булгур', emoji: '🌾', kcal100: 340, prot100: 12 }, { id: 'quinoa', name: 'Киноа', emoji: '🌾', kcal100: 368, prot100: 14 }, { id: 'bread_white', name: 'Хлеб белый', emoji: '🍞', kcal100: 250, prot100: 8 }, { id: 'bread_black', name: 'Хлеб черный', emoji: '🍞', kcal100: 220, prot100: 7 }, { id: 'bread_borodino', name: 'Хлеб Бородинский', emoji: '🍞', kcal100: 210, prot100: 7 }, { id: 'lavash', name: 'Лаваш тонкий', emoji: '🫓', kcal100: 270, prot100: 9 }, { id: 'corn', name: 'Кукуруза', emoji: '🌽', kcal100: 86, prot100: 3.2 }, { id: 'potato', name: 'Картофель', emoji: '🥔', kcal100: 90, prot100: 2 }, { id: 'sweet_potato', name: 'Батат', emoji: '🍠', kcal100: 86, prot100: 1.6 }, { id: 'broccoli', name: 'Брокколи', emoji: '🥦', kcal100: 34, prot100: 3 }, { id: 'spinach', name: 'Шпинат', emoji: '🥬', kcal100: 23, prot100: 3 }, { id: 'tomato', name: 'Помидор', emoji: '🍅', kcal100: 18, prot100: 1 }, { id: 'cucumber', name: 'Огурец', emoji: '🥒', kcal100: 15, prot100: 0.7 }, { id: 'carrot', name: 'Морковь', emoji: '🥕', kcal100: 41, prot100: 0.9 }, { id: 'onion', name: 'Лук', emoji: '🧅', kcal100: 40, prot100: 1.1 }, { id: 'pepper', name: 'Перец болгарский', emoji: '🫑', kcal100: 26, prot100: 1 }, { id: 'cabbage', name: 'Капуста', emoji: '🥬', kcal100: 25, prot100: 1.3 }, { id: 'cauliflower', name: 'Цветная капуста', emoji: '🥦', kcal100: 25, prot100: 2 }, { id: 'zucchini', name: 'Кабачок', emoji: '🥒', kcal100: 17, prot100: 1.2 }, { id: 'avocado', name: 'Авокадо', emoji: '🥑', kcal100: 160, prot100: 2 }, { id: 'mushrooms', name: 'Грибы', emoji: '🍄', kcal100: 27, prot100: 4 }, { id: 'peas', name: 'Горошек', emoji: '🟢', kcal100: 81, prot100: 5 }, { id: 'banana', name: 'Банан', emoji: '🍌', kcal100: 90, prot100: 1.5 }, { id: 'apple', name: 'Яблоко', emoji: '🍎', kcal100: 52, prot100: 0.3 }, { id: 'orange', name: 'Апельсин', emoji: '🍊', kcal100: 47, prot100: 0.9 }, { id: 'pear', name: 'Груша', emoji: '🍐', kcal100: 57, prot100: 0.4 }, { id: 'grape', name: 'Виноград', emoji: '🍇', kcal100: 69, prot100: 0.7 }, { id: 'strawberry', name: 'Клубника', emoji: '🍓', kcal100: 32, prot100: 0.7 }, { id: 'blueberry', name: 'Голубика', emoji: '🫐', kcal100: 57, prot100: 0.7 }, { id: 'kiwi', name: 'Киви', emoji: '🥝', kcal100: 61, prot100: 1.1 }, { id: 'watermelon', name: 'Арбуз', emoji: '🍉', kcal100: 30, prot100: 0.6 }, { id: 'pineapple', name: 'Ананас', emoji: '🍍', kcal100: 50, prot100: 0.5 }, { id: 'lemon', name: 'Лимон', emoji: '🍋', kcal100: 29, prot100: 1.1 }, { id: 'peach', name: 'Персик', emoji: '🍑', kcal100: 39, prot100: 0.9 }, { id: 'almonds', name: 'Миндаль', emoji: '🌰', kcal100: 600, prot100: 21 }, { id: 'walnuts', name: 'Грецкий орех', emoji: '🌰', kcal100: 654, prot100: 15 }, { id: 'cashew', name: 'Кешью', emoji: '🌰', kcal100: 553, prot100: 18 }, { id: 'peanuts', name: 'Арахис', emoji: '🥜', kcal100: 567, prot100: 26 }, { id: 'sunflower_seeds', name: 'Семечки', emoji: '🌻', kcal100: 584, prot100: 21 }, { id: 'olive_oil', name: 'Масло оливковое', emoji: '🫒', kcal100: 884, prot100: 0 }, { id: 'peanut_butter', name: 'Паста арахисовая', emoji: '🥜', kcal100: 588, prot100: 25 }, { id: 'chia', name: 'Семена чиа', emoji: '⚫', kcal100: 486, prot100: 17 }, { id: 'pancakes', name: 'Блины', emoji: '🥞', kcal100: 230, prot100: 6 }, { id: 'pancakes_cheese', name: 'Сырники', emoji: '🥞', kcal100: 220, prot100: 14 }, { id: 'chocolate_dark', name: 'Шоколад темный', emoji: '🍫', kcal100: 546, prot100: 4.9 }, { id: 'chocolate_milk', name: 'Шоколад молочный', emoji: '🍫', kcal100: 535, prot100: 7.6 }, { id: 'cookie', name: 'Печенье', emoji: '🍪', kcal100: 450, prot100: 5 }, { id: 'cake', name: 'Торт', emoji: '🍰', kcal100: 350, prot100: 4 }, { id: 'ice_cream', name: 'Мороженое', emoji: '🍦', kcal100: 200, prot100: 3.5 }, { id: 'honey', name: 'Мед', emoji: '🍯', kcal100: 300, prot100: 0.3 }, { id: 'condensed_milk', name: 'Сгущенка', emoji: '🍯', kcal100: 320, prot100: 7.5 }, { id: 'sugar', name: 'Сахар', emoji: '🧂', kcal100: 400, prot100: 0 }, { id: 'jam', name: 'Варенье', emoji: '🍓', kcal100: 250, prot100: 0.3 }, { id: 'croissant', name: 'Круассан', emoji: '🥐', kcal100: 406, prot100: 8 }, { id: 'pizza', name: 'Пицца', emoji: '🍕', kcal100: 260, prot100: 11 }, { id: 'burger', name: 'Бургер', emoji: '🍔', kcal100: 295, prot100: 15 }, { id: 'fries', name: 'Картофель фри', emoji: '🍟', kcal100: 312, prot100: 3.4 }, { id: 'sushi', name: 'Роллы', emoji: '🍣', kcal100: 150, prot100: 6 }, { id: 'noodles', name: 'Лапша вок', emoji: '🍜', kcal100: 180, prot100: 6 }, { id: 'borscht', name: 'Борщ', emoji: '🍲', kcal100: 50, prot100: 2 }, { id: 'soup', name: 'Суп куриный', emoji: '🍲', kcal100: 40, prot100: 3 }, { id: 'shaurma', name: 'Шаурма', emoji: '🌯', kcal100: 220, prot100: 12 }, { id: 'protein', name: 'Протеин (порошок)', emoji: '💪', kcal100: 375, prot100: 75 }, { id: 'bcaa', name: 'BCAA', emoji: '💪', kcal100: 0, prot100: 0 }, { id: 'creatine', name: 'Креатин', emoji: '💪', kcal100: 0, prot100: 0 }, { id: 'gainer', name: 'Гейнер', emoji: '💪', kcal100: 380, prot100: 15 }, { id: 'water', name: 'Вода', emoji: '💧', kcal100: 0, prot100: 0 }, { id: 'coffee', name: 'Кофе черный', emoji: '☕', kcal100: 2, prot100: 0.3 }, { id: 'latte', name: 'Латте', emoji: '☕', kcal100: 50, prot100: 3 }, { id: 'cappuccino', name: 'Капучино', emoji: '☕', kcal100: 40, prot100: 2.5 }, { id: 'tea_green', name: 'Чай зеленый', emoji: '🍵', kcal100: 1, prot100: 0 }, { id: 'tea_black', name: 'Чай черный', emoji: '🍵', kcal100: 1, prot100: 0 }, { id: 'juice_orange', name: 'Сок апельсиновый', emoji: '🍊', kcal100: 45, prot100: 0.7 }, { id: 'juice_apple', name: 'Сок яблочный', emoji: '🍏', kcal100: 46, prot100: 0.1 }, { id: 'juice_tomato', name: 'Сок томатный', emoji: '🍅', kcal100: 20, prot100: 1 }, { id: 'smoothie', name: 'Смузи', emoji: '🥤', kcal100: 60, prot100: 1 }, { id: 'milk_shake', name: 'Молочный коктейль', emoji: '🥤', kcal100: 110, prot100: 3 }, { id: 'cola', name: 'Кола', emoji: '🥤', kcal100: 42, prot100: 0 }, { id: 'sprite', name: 'Спрайт', emoji: '🥤', kcal100: 40, prot100: 0 }, { id: 'energy', name: 'Энергетик', emoji: '⚡', kcal100: 45, prot100: 0 }, { id: 'lemonade', name: 'Лимонад', emoji: '🍋', kcal100: 35, prot100: 0 }, { id: 'kvass', name: 'Квас', emoji: '🍺', kcal100: 25, prot100: 0.2 }, { id: 'beer_light', name: 'Пиво светлое', emoji: '🍺', kcal100: 42, prot100: 0.5 }, { id: 'beer_dark', name: 'Пиво темное', emoji: '🍺', kcal100: 48, prot100: 0.6 }, { id: 'wine_red', name: 'Вино красное', emoji: '🍷', kcal100: 85, prot100: 0.1 }, { id: 'wine_white', name: 'Вино белое', emoji: '🍷', kcal100: 82, prot100: 0.1 }, { id: 'champagne', name: 'Шампанское', emoji: '🍾', kcal100: 80, prot100: 0.2 }, { id: 'vodka', name: 'Водка', emoji: '🍸', kcal100: 235, prot100: 0 }, { id: 'whiskey', name: 'Виски', emoji: '🥃', kcal100: 250, prot100: 0 }, { id: 'rum', name: 'Ром', emoji: '🥃', kcal100: 231, prot100: 0 }, { id: 'mojito', name: 'Мохито', emoji: '🍹', kcal100: 90, prot100: 0.1 }, { id: 'cider', name: 'Сидр', emoji: '🍎', kcal100: 46, prot100: 0 }
+        // --- КОМПАКТНАЯ БАЗА ПРОДУКТОВ (145+ позиций) ---
+        // Формат: [id, name, emoji, kcal, protein]
+        const rawFood = [
+            ['chicken_breast', 'Куриная грудка', '🍗', 110, 23], ['chicken_thigh', 'Куриное бедро', '🍗', 160, 18], ['turkey', 'Индейка', '🦃', 110, 24], ['beef', 'Говядина', '🥩', 200, 26], ['veal', 'Телятина', '🥩', 150, 22], ['pork', 'Свинина', '🥓', 260, 25], ['bacon', 'Бекон', '🥓', 540, 37], ['lamb', 'Баранина', '🐑', 250, 22], ['duck', 'Утка', '🦆', 330, 19], ['ham', 'Ветчина', '🍖', 150, 20], ['sausage', 'Колбаса вареная', '🌭', 250, 12], ['salami', 'Салями', '🍕', 400, 20], ['liver', 'Печень куриная', '🍖', 140, 20], ['rabbit', 'Кролик', '🐇', 170, 21], ['cod', 'Треска', '🐟', 80, 18], ['salmon', 'Лосось', '🍣', 200, 20], ['tuna', 'Тунец', '🐟', 130, 23], ['mackerel', 'Скумбрия', '🐟', 250, 18], ['herring', 'Сельдь', '🐟', 250, 17], ['trout', 'Форель', '🐟', 140, 20], ['shrimp', 'Креветки', '🍤', 100, 20], ['squid', 'Кальмар', '🦑', 90, 15], ['crab', 'Крабовые палочки', '🦀', 90, 6], ['caviar', 'Икра', '🥫', 250, 25], ['mussels', 'Мидии', '🦪', 70, 12], ['octopus', 'Осьминог', '🐙', 80, 15], ['eggs', 'Яйца куриные', '🥚', 155, 13], ['quail_eggs', 'Яйца перепелиные', '🥚', 168, 13], ['milk', 'Молоко 2.5%', '🥛', 52, 3], ['milk_skim', 'Молоко обезжир.', '🥛', 34, 3], ['kefir', 'Кефир', '🥛', 40, 3], ['yogurt', 'Йогурт натуральный', '🥛', 60, 5], ['yogurt_greek', 'Йогурт греческий', '🥛', 90, 9], ['cottage', 'Творог 5%', '🧀', 120, 18], ['cottage_0', 'Творог обезжир.', '🧀', 80, 18], ['cheese', 'Сыр твердый', '🧀', 350, 25], ['mozzarella', 'Моцарелла', '🧀', 280, 22], ['sour_cream', 'Сметана 20%', '🥛', 200, 3], ['butter', 'Масло сливочное', '🧈', 717, 1], ['cream', 'Сливки 10%', '🥛', 120, 3], ['tofu', 'Тофу', '🧊', 76, 8], ['rice', 'Рис отварной', '🍚', 130, 2.5], ['buckwheat', 'Гречка отварная', '🌾', 110, 4], ['oats', 'Овсянка (сухая)', '🥣', 370, 13], ['pasta', 'Макароны отварные', '🍝', 150, 5], ['spaghetti', 'Спагетти', '🍝', 160, 6], ['bulgur', 'Булгур', '🌾', 340, 12], ['quinoa', 'Киноа', '🌾', 368, 14], ['bread_white', 'Хлеб белый', '🍞', 250, 8], ['bread_black', 'Хлеб черный', '🍞', 220, 7], ['bread_borodino', 'Хлеб Бородинский', '🍞', 210, 7], ['lavash', 'Лаваш тонкий', '🫓', 270, 9], ['corn', 'Кукуруза', '🌽', 86, 3.2], ['potato', 'Картофель', '🥔', 90, 2], ['sweet_potato', 'Батат', '🍠', 86, 1.6], ['broccoli', 'Брокколи', '🥦', 34, 3], ['spinach', 'Шпинат', '🥬', 23, 3], ['tomato', 'Помидор', '🍅', 18, 1], ['cucumber', 'Огурец', '🥒', 15, 0.7], ['carrot', 'Морковь', '🥕', 41, 0.9], ['onion', 'Лук', '🧅', 40, 1.1], ['pepper', 'Перец болгарский', '🫑', 26, 1], ['cabbage', 'Капуста', '🥬', 25, 1.3], ['cauliflower', 'Цветная капуста', '🥦', 25, 2], ['zucchini', 'Кабачок', '🥒', 17, 1.2], ['avocado', 'Авокадо', '🥑', 160, 2], ['mushrooms', 'Грибы', '🍄', 27, 4], ['peas', 'Горошек', '🟢', 81, 5], ['banana', 'Банан', '🍌', 90, 1.5], ['apple', 'Яблоко', '🍎', 52, 0.3], ['orange', 'Апельсин', '🍊', 47, 0.9], ['pear', 'Груша', '🍐', 57, 0.4], ['grape', 'Виноград', '🍇', 69, 0.7], ['strawberry', 'Клубника', '🍓', 32, 0.7], ['blueberry', 'Голубика', '🫐', 57, 0.7], ['kiwi', 'Киви', '🥝', 61, 1.1], ['watermelon', 'Арбуз', '🍉', 30, 0.6], ['pineapple', 'Ананас', '🍍', 50, 0.5], ['lemon', 'Лимон', '🍋', 29, 1.1], ['peach', 'Персик', '🍑', 39, 0.9], ['almonds', 'Миндаль', '🌰', 600, 21], ['walnuts', 'Грецкий орех', '🌰', 654, 15], ['cashew', 'Кешью', '🌰', 553, 18], ['peanuts', 'Арахис', '🥜', 567, 26], ['sunflower_seeds', 'Семечки', '🌻', 584, 21], ['olive_oil', 'Масло оливковое', '🫒', 884, 0], ['peanut_butter', 'Паста арахисовая', '🥜', 588, 25], ['chia', 'Семена чиа', '⚫', 486, 17], ['pancakes', 'Блины', '🥞', 230, 6], ['pancakes_cheese', 'Сырники', '🥞', 220, 14], ['chocolate_dark', 'Шоколад темный', '🍫', 546, 4.9], ['chocolate_milk', 'Шоколад молочный', '🍫', 535, 7.6], ['cookie', 'Печенье', '🍪', 450, 5], ['cake', 'Торт', '🍰', 350, 4], ['ice_cream', 'Мороженое', '🍦', 200, 3.5], ['honey', 'Мед', '🍯', 300, 0.3], ['condensed_milk', 'Сгущенка', '🍯', 320, 7.5], ['sugar', 'Сахар', '🧂', 400, 0], ['jam', 'Варенье', '🍓', 250, 0.3], ['croissant', 'Круассан', '🥐', 406, 8], ['pizza', 'Пицца', '🍕', 260, 11], ['burger', 'Бургер', '🍔', 295, 15], ['fries', 'Картофель фри', '🍟', 312, 3.4], ['sushi', 'Роллы', '🍣', 150, 6], ['noodles', 'Лапша вок', '🍜', 180, 6], ['borscht', 'Борщ', '🍲', 50, 2], ['soup', 'Суп куриный', '🍲', 40, 3], ['shaurma', 'Шаурма', '🌯', 220, 12], ['protein', 'Протеин (порошок)', '💪', 375, 75], ['bcaa', 'BCAA', '💪', 0, 0], ['creatine', 'Креатин', '💪', 0, 0], ['gainer', 'Гейнер', '💪', 380, 15], ['water', 'Вода', '💧', 0, 0], ['coffee', 'Кофе черный', '☕', 2, 0.3], ['latte', 'Латте', '☕', 50, 3], ['cappuccino', 'Капучино', '☕', 40, 2.5], ['tea_green', 'Чай зеленый', '🍵', 1, 0], ['tea_black', 'Чай черный', '🍵', 1, 0], ['juice_orange', 'Сок апельсиновый', '🍊', 45, 0.7], ['juice_apple', 'Сок яблочный', '🍏', 46, 0.1], ['juice_tomato', 'Сок томатный', '🍅', 20, 1], ['smoothie', 'Смузи', '🥤', 60, 1], ['milk_shake', 'Молочный коктейль', '🥤', 110, 3], ['cola', 'Кола', '🥤', 42, 0], ['sprite', 'Спрайт', '🥤', 40, 0], ['energy', 'Энергетик', '⚡', 45, 0], ['lemonade', 'Лимонад', '🍋', 35, 0], ['kvass', 'Квас', '🍺', 25, 0.2], ['beer_light', 'Пиво светлое', '🍺', 42, 0.5], ['beer_dark', 'Пиво темное', '🍺', 48, 0.6], ['wine_red', 'Вино красное', '🍷', 85, 0.1], ['wine_white', 'Вино белое', '🍷', 82, 0.1], ['champagne', 'Шампанское', '🍾', 80, 0.2], ['vodka', 'Водка', '🍸', 235, 0], ['whiskey', 'Виски', '🥃', 250, 0], ['rum', 'Ром', '🥃', 231, 0], ['mojito', 'Мохито', '🍹', 90, 0.1], ['cider', 'Сидр', '🍎', 46, 0]
         ];
+        const foodDatabase = rawFood.map(f => ({ id: f[0], name: f[1], emoji: f[2], kcal100: f[3], prot100: f[4] }));
 
         const exercisePool = {
             chest: [ { name: 'Жим штанги лежа', equip: 'Штанга', type: 'compound' }, { name: 'Жим гантелей лежа', equip: 'Гантели', type: 'compound' }, { name: 'Жим в тренажере (Хаммер)', equip: 'Тренажер', type: 'compound' }, { name: 'Отжимания на брусьях', equip: 'Свой вес', type: 'compound' }, { name: 'Разводка гантелей', equip: 'Гантели', type: 'isolation' }, { name: 'Сведение рук в кроссовере', equip: 'Блок', type: 'isolation' }, { name: 'Жим штанги на наклонной', equip: 'Штанга', type: 'compound' } ],
@@ -393,8 +426,15 @@
         let sessionTimer, restInterval, obData = { name: '', weight: 0, age: '', exp: '', goal: '', days: '' };
         let restEndTime = 0;
 
+        // Обработка Splash Screen
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('splash-screen').classList.add('hidden');
+            }, 2000); // 2 секунды показываем загрузку
+        });
+
         function loadData() {
-            const saved = localStorage.getItem('ktoSdohTotLohV29'); 
+            const saved = localStorage.getItem('ktoSdohTotLohV31'); 
             if (saved) { 
                 state = JSON.parse(saved); 
                 if(state.profile) { 
@@ -404,7 +444,7 @@
                 } else showOnboarding(); 
             } else showOnboarding();
         }
-        function saveData() { localStorage.setItem('ktoSdohTotLohV29', JSON.stringify(state)); }
+        function saveData() { localStorage.setItem('ktoSdohTotLohV31', JSON.stringify(state)); }
         function createEmptySets(count) { return Array.from({ length: count }, () => ({ w: '', r: '', done: false, tag: 'normal' })); }
 
         let currentObStep = 1;
@@ -507,7 +547,10 @@
         function renderHeatmap() {
             const now = Date.now(); const list = document.getElementById('recovery-list'); list.innerHTML = ''; 
             
-            document.querySelectorAll('.muscle-path').forEach(el => el.setAttribute('fill', '#444'));
+            document.querySelectorAll('.muscle-group').forEach(el => {
+                if(el.id.includes('front')) el.setAttribute('fill', 'url(#muscle-grad-front)');
+                else el.setAttribute('fill', 'url(#muscle-grad-back)');
+            });
 
             const muscles = [
                 { id: 'chest', name: 'Грудь', targets: ['m-chest'] }, 
@@ -523,9 +566,19 @@
                 let color = 'green', colorHex = '#a3e635'; 
                 if (daysAgo < 1) { color = 'red'; colorHex = '#ef4444'; } 
                 else if (daysAgo < 2) { color = 'yellow'; colorHex = '#f97316'; } 
-                else if (daysAgo > 1000) { color = 'gray'; colorHex = '#444'; }
+                else if (daysAgo > 1000) { color = 'gray'; colorHex = 'none'; } 
                 
-                m.targets.forEach(tid => { let el = document.getElementById(tid); if(el && color !== 'gray') el.setAttribute('fill', colorHex); });
+                m.targets.forEach(tid => { 
+                    let el = document.getElementById(tid); 
+                    if(el) {
+                        if (color !== 'gray') {
+                            el.setAttribute('fill', colorHex);
+                        } else {
+                            if(tid.includes('front')) el.setAttribute('fill', 'url(#muscle-grad-front)');
+                            else el.setAttribute('fill', 'url(#muscle-grad-back)');
+                        }
+                    } 
+                });
                 list.innerHTML += `<div class="recovery-item"><div class="dot ${color === 'gray' ? '' : color}" style="${color === 'gray' ? 'background:#444' : ''}"></div> ${m.name}</div>`; 
             });
         }
@@ -563,7 +616,7 @@
                 let setsHtml = ex.sets.map((set, sIdx) => {
                     let tagClass = set.tag !== 'normal' ? `tag-${set.tag}` : '';
                     let tagText = set.tag === 'warmup' ? 'W' : set.tag === 'failure' ? 'F' : set.tag === 'drop' ? 'D' : (sIdx + 1);
-                    return `<div class="set-row ${tagClass}"><div class="set-num" onclick="cycleTag(${index}, ${sIdx}, this)">${tagText}</div><input type="number" inputmode="decimal" value="${set.w}" oninput="updateSet(${index}, ${sIdx}, 'w', this.value)" placeholder="кг" class="set-input"><span style="color: #555;">×</span><input type="number" inputmode="numeric" value="${set.r}" oninput="updateSet(${index}, ${sIdx}, 'r', this.value)" placeholder="раз" class="set-input"><button class="btn-check ${set.done ? 'done' : ''}" onclick="toggleSet(${index}, ${sIdx}, this)">✓</button></div>`;
+                    return `<div class="set-row ${tagClass}"><div class="set-num" onclick="cycleTag(${index}, ${sIdx}, this)">${tagText}</div><input type="number" inputmode="decimal" value="${set.w}" oninput="updateSet(${index}, ${sIdx}, 'w', this.value)" placeholder="кг" class="set-input"><span style="color: #555; font-weight:bold;">×</span><input type="number" inputmode="numeric" value="${set.r}" oninput="updateSet(${index}, ${sIdx}, 'r', this.value)" placeholder="раз" class="set-input"><button class="btn-check ${set.done ? 'done' : ''}" onclick="toggleSet(${index}, ${sIdx}, this)">✓</button></div>`;
                 }).join('');
                 container.innerHTML += `<div class="card exercise-card-anim" style="animation-delay: ${index * 0.05}s"><div class="ex-header"><div><div class="ex-title">${index + 1}. ${ex.name}</div><div class="ex-target">${ex.target}</div></div><div style="display:flex; gap: 8px;"><button class="action-btn" onclick="openCalcModal(${ex.sets[0]?.w}, ${ex.sets[0]?.r})">🧮</button><button class="action-btn" onclick="openExInfo('${ex.name}', '${ex.equipment}')">ℹ️</button></div></div>${prevHtml}<div>${setsHtml}</div></div>`;
             });
@@ -587,15 +640,15 @@
         function openCalcModal(w, r) { document.getElementById('calc-weight').value = w || ''; document.getElementById('calc-reps').value = r || ''; document.getElementById('calc-result').style.display = 'none'; openModal('modal-calc'); }
         function runCalculator() { const w = parseFloat(document.getElementById('calc-weight').value); const r = parseInt(document.getElementById('calc-reps').value); if (!w || !r) return; const oneRM = Math.round(w * (1 + r / 30)); document.getElementById('calc-1rm').innerText = `Твой максимум: ~${oneRM} кг`; document.getElementById('calc-warmup').innerHTML = [{ p: 0.4, reps: 5 }, { p: 0.6, reps: 3 }, { p: 0.8, reps: 1 }].map(x => `${Math.round((oneRM * x.p) / 2.5) * 2.5} кг × ${x.reps}`).join('<br>'); document.getElementById('calc-result').style.display = 'block'; }
 
-        function renderChart() { const exName = document.getElementById('stats-exercise').value; const container = document.getElementById('chart-container'); container.innerHTML = ''; let dataPoints = []; state.history.forEach(session => { let ex = session.exercises.find(e => e.name === exName); if (ex) { let bestSet = ex.sets.filter(s => s.w && s.tag !== 'warmup').sort((a,b) => b.w - a.w)[0]; if (bestSet) dataPoints.push({ date: session.date, weight: parseFloat(bestSet.w) }); } }); if (dataPoints.length === 0) { container.innerHTML = '<div style="width:100%; text-align:center; color:#666; font-size:12px; align-self:center;">Нет данных.</div>'; return; } dataPoints = dataPoints.slice(-5); const maxWeight = Math.max(...dataPoints.map(d => d.weight)); dataPoints.forEach(d => { container.innerHTML += `<div class="chart-bar" style="height: ${(d.weight / maxWeight) * 100}%;"><div class="chart-value">${d.weight}</div><div class="chart-label">${d.date.split(' ')[0]}</div></div>`; }); }
+        function renderChart() { const exName = document.getElementById('stats-exercise').value; const container = document.getElementById('chart-container'); container.innerHTML = ''; let dataPoints = []; state.history.forEach(session => { let ex = session.exercises.find(e => e.name === exName); if (ex) { let bestSet = ex.sets.filter(s => s.w && s.tag !== 'warmup').sort((a,b) => b.w - a.w)[0]; if (bestSet) dataPoints.push({ date: session.date, weight: parseFloat(bestSet.w) }); } }); if (dataPoints.length === 0) { container.innerHTML = '<div style="width:100%; text-align:center; color:#666; font-size:14px; align-self:center;">Нет данных для графика.</div>'; return; } dataPoints = dataPoints.slice(-5); const maxWeight = Math.max(...dataPoints.map(d => d.weight)); dataPoints.forEach(d => { container.innerHTML += `<div class="chart-bar" style="height: ${(d.weight / maxWeight) * 100}%;"><div class="chart-value">${d.weight}</div><div class="chart-label">${d.date.split(' ')[0]}</div></div>`; }); }
 
         function renderHistory() {
             const container = document.getElementById('history-container'); container.innerHTML = '';
             if (state.history.length === 0) { container.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">Пока нет завершенных тренировок.</div>'; return; }
             const sortedHistory = [...state.history].map((session, index) => ({...session, originalIndex: index})).reverse();
             sortedHistory.forEach(session => {
-                let detailsHtml = session.exercises.filter(ex => ex.sets.some(s => s.w || s.r)).map(ex => { let bestSet = ex.sets.filter(s => s.w && s.tag !== 'warmup').sort((a,b) => b.w - a.w)[0] || ex.sets[0]; let res = bestSet.w ? `${bestSet.w}кг×${bestSet.r || '?'}` : `${bestSet.r} раз`; return `${ex.name}: <span style="color:var(--accent);">${res}</span>`; }).join('<br>') || "Нет данных";
-                container.innerHTML += `<div class="card history-card exercise-card-anim" style="position:relative;"><div style="display:flex; gap: 8px; position:absolute; top:16px; right:16px;"><button onclick="copyWorkout(${session.originalIndex})" style="background:rgba(163,230,53,0.1); border:none; color:var(--accent); padding:4px 8px; border-radius:4px; font-size:12px; font-weight:bold;">📋</button><button onclick="deleteHistory(${session.originalIndex})" style="background:rgba(239,68,68,0.1); border:none; color:var(--accent-red); padding:4px 8px; border-radius:4px; font-size:12px;">🗑</button></div><div class="history-header"><div><div class="history-date">${session.date}</div><div class="history-name">${session.name}</div></div><div class="history-time">⏱ ${session.duration} мин</div></div><div class="history-details" style="padding-right: 60px;">${detailsHtml}</div></div>`;
+                let detailsHtml = session.exercises.filter(ex => ex.sets.some(s => s.w || s.r)).map(ex => { let bestSet = ex.sets.filter(s => s.w && s.tag !== 'warmup').sort((a,b) => b.w - a.w)[0] || ex.sets[0]; let res = bestSet.w ? `${bestSet.w}кг×${bestSet.r || '?'}` : `${bestSet.r} раз`; return `<div style="margin-bottom: 4px;">${ex.name}: <span style="color:var(--accent); font-weight:bold;">${res}</span></div>`; }).join('') || "Нет данных";
+                container.innerHTML += `<div class="card history-card exercise-card-anim" style="position:relative;"><div style="display:flex; gap: 8px; position:absolute; top:16px; right:16px;"><button onclick="copyWorkout(${session.originalIndex})" style="background:rgba(163,230,53,0.1); border:none; color:var(--accent); padding:6px 10px; border-radius:8px; font-size:14px; font-weight:bold;">📋</button><button onclick="deleteHistory(${session.originalIndex})" style="background:rgba(239,68,68,0.1); border:none; color:var(--accent-red); padding:6px 10px; border-radius:8px; font-size:14px;">🗑</button></div><div class="history-header"><div><div class="history-date" style="color:#888; font-size:12px; margin-bottom:4px;">${session.date}</div><div class="history-name" style="font-size:18px; font-weight:bold;">${session.name}</div></div><div class="history-time" style="font-size:12px; background:rgba(255,255,255,0.1); padding:4px 8px; border-radius:6px; color:var(--accent);">⏱ ${session.duration} мин</div></div><div class="history-details" style="padding-right: 70px; font-size:14px; color:#ccc; line-height:1.5;">${detailsHtml}</div></div>`;
             });
         }
 
@@ -640,7 +693,6 @@
             alert(`Тренировка сохранена! Сожжено ~${kcalBurned} ккал.`);
         }
 
-        // --- ИСПРАВЛЕНА ОШИБКА С ОТСУТСТВУЮЩИМИ ЭЛЕМЕНТАМИ ---
         function renderNutrition() { 
             const dashKcal = document.getElementById('dash-kcal');
             if (dashKcal) dashKcal.innerText = state.nutrition.kcal;
@@ -686,20 +738,34 @@
 
         function toggleTimer() { if (state.isTimerRunning) stopTimer(); else startTimer(); }
         function startTimer() { state.isTimerRunning = true; state.timerStartTime = Date.now(); saveData(); startTimerLogic(); }
-        function startTimerLogic() { document.getElementById('timer-btn').innerText = 'Пауза'; document.getElementById('timer-btn').style.background = '#555'; clearInterval(sessionTimer); sessionTimer = setInterval(() => { if (!state.timerStartTime) return; state.sessionSeconds = Math.floor((Date.now() - state.timerStartTime) / 1000); updateTimerDisplay(); }, 1000); }
+        function startTimerLogic() { document.getElementById('timer-btn').innerText = 'Пауза'; document.getElementById('timer-btn').style.background = 'rgba(255,255,255,0.1)'; clearInterval(sessionTimer); sessionTimer = setInterval(() => { if (!state.timerStartTime) return; state.sessionSeconds = Math.floor((Date.now() - state.timerStartTime) / 1000); updateTimerDisplay(); }, 1000); }
         function stopTimer(reset = false) { state.isTimerRunning = false; clearInterval(sessionTimer); document.getElementById('timer-btn').innerText = 'Старт'; document.getElementById('timer-btn').style.background = 'var(--accent-orange)'; if(reset) { state.sessionSeconds = 0; state.timerStartTime = null; updateTimerDisplay(); } saveData(); }
         function updateTimerDisplay() { document.getElementById('timer-display').innerText = `${Math.floor(state.sessionSeconds / 60).toString().padStart(2, '0')}:${(state.sessionSeconds % 60).toString().padStart(2, '0')}`; }
 
-        function switchTab(tab) { document.querySelectorAll('main > section').forEach(s => s.classList.remove('active')); document.getElementById(`view-${tab}`).classList.add('active'); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.getElementById(`nav-${tab}`).classList.add('active'); document.getElementById('main-content').scrollTop = 0; if(tab === 'stats') renderChart(); }
+        function switchTab(tab) { 
+            document.querySelectorAll('main > section').forEach(s => s.classList.remove('active')); 
+            document.getElementById(`view-${tab}`).classList.add('active'); 
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); 
+            document.getElementById(`nav-${tab}`).classList.add('active'); 
+            document.getElementById('main-content').scrollTop = 0; 
+            if(tab === 'stats') renderChart(); 
+        }
 
         function openModal(id) { document.getElementById(id).classList.add('active'); }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
         
-        function openProfileModal() { if(!state.profile) return; const p = state.profile; const goalMap = { mass: 'Набор массы', fatloss: 'Жиросжигание', health: 'Здоровье и тонус' }; const expMap = { beginner: 'Новичок', intermediate: 'Средний', advanced: 'Продвинутый' }; const ageMap = { '18-25': '18-25 лет', '26-35': '26-35 лет', '36-45': '36-45 лет', '45+': 'Старше 45 лет' }; document.getElementById('profile-details').innerHTML = `<b>Имя:</b> ${p.name}<br><b>Вес:</b> ${p.weight} кг<br><b>Возраст:</b> ${ageMap[p.age] || p.age}<br><b>Опыт:</b> ${expMap[p.exp] || p.exp}<br><b>Цель:</b> ${goalMap[p.goal] || p.goal}<br><b>Дней в неделю:</b> ${p.days}<br><b>Цель по калориям:</b> ${p.targetKcal} ккал<br><b>Цель по белку:</b> ${p.targetProt} г`; openModal('modal-profile'); }
+        function openProfileModal() { 
+            if(!state.profile) return; const p = state.profile; 
+            const goalMap = { mass: 'Набор массы', fatloss: 'Жиросжигание', health: 'Здоровье и тонус' }; 
+            const expMap = { beginner: 'Новичок', intermediate: 'Средний', advanced: 'Продвинутый' }; 
+            const ageMap = { '18-25': '18-25 лет', '26-35': '26-35 лет', '36-45': '36-45 лет', '45+': 'Старше 45 лет' }; 
+            document.getElementById('profile-details').innerHTML = `<b>Имя:</b> ${p.name}<br><b>Вес:</b> ${p.weight} кг<br><b>Возраст:</b> ${ageMap[p.age] || p.age}<br><b>Опыт:</b> ${expMap[p.exp] || p.exp}<br><b>Цель:</b> ${goalMap[p.goal] || p.goal}<br><b>Дней в неделю:</b> ${p.days}<br><b>Цель по калориям:</b> ${p.targetKcal} ккал<br><b>Цель по белку:</b> ${p.targetProt} г`; 
+            openModal('modal-profile'); 
+        }
         function resetProfile() { if(confirm('Сбросить профиль?')) { state.profile = null; state.weeklyPlan = []; saveData(); closeModal('modal-profile'); showOnboarding(); } }
 
         function filterFood() { const query = document.getElementById('food-search').value.toLowerCase(); filteredFoods = foodDatabase.filter(f => f.name.toLowerCase().includes(query)); renderFoodDatabase(); }
-        function renderFoodDatabase() { const container = document.getElementById('food-container'); container.innerHTML = ''; filteredFoods.forEach(food => { container.innerHTML += `<button class="food-btn exercise-card-anim" onclick="openFoodModal('${food.id}')"><div style="font-size: 24px;">${food.emoji}</div><div class="food-info"><div class="food-title">${food.name}</div><div class="food-desc">${food.kcal100} ккал • ${food.prot100}г</div></div></button>`; }); }
+        function renderFoodDatabase() { const container = document.getElementById('food-container'); container.innerHTML = ''; filteredFoods.forEach(food => { container.innerHTML += `<button class="food-btn exercise-card-anim" onclick="openFoodModal('${food.id}')"><div style="font-size: 28px;">${food.emoji}</div><div class="food-info"><div class="food-title">${food.name}</div><div class="food-desc">${food.kcal100} ккал • ${food.prot100}г</div></div></button>`; }); }
         function openFoodModal(id) { currentFood = foodDatabase.find(f => f.id === id); document.getElementById('food-modal-title').innerText = `${currentFood.emoji} ${currentFood.name}`; document.getElementById('food-grams').value = 100; updateFoodCalc(); openModal('modal-food'); }
         function updateFoodCalc() { const grams = parseFloat(document.getElementById('food-grams').value) || 0; document.getElementById('food-calc-kcal').innerText = Math.round((currentFood.kcal100 / 100) * grams); document.getElementById('food-calc-prot').innerText = Math.round((currentFood.prot100 / 100) * grams * 10) / 10; }
         function confirmAddFood() { const grams = parseFloat(document.getElementById('food-grams').value) || 0; state.nutrition.kcal += Math.round((currentFood.kcal100 / 100) * grams); state.nutrition.prot += Math.round((currentFood.prot100 / 100) * grams * 10) / 10; saveData(); renderNutrition(); closeModal('modal-food'); if(navigator.vibrate) navigator.vibrate(40); }
