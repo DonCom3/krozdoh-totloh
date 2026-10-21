@@ -8,86 +8,62 @@
     <title>Кто сдох, тот лох</title>
     <style>
         :root {
-            --bg-color: #0f0f0f; --card-bg: rgba(30, 30, 30, 0.7); --text-main: #ffffff; --text-muted: #a1a1aa;
-            --accent: #a3e635; --accent-orange: #f97316; --accent-red: #ef4444; --accent-blue: #3b82f6; --border: rgba(255,255,255,0.1);
-            --glass-blur: blur(20px);
+            --bg-color: #121212; --card-bg: #1e1e1e; --text-main: #ffffff; --text-muted: #a1a1aa;
+            --accent: #a3e635; --accent-orange: #f97316; --accent-red: #ef4444; --accent-blue: #3b82f6; --border: #333333;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
         
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            background-color: #000; color: var(--text-main); 
-            display: flex; justify-content: center; 
-            height: 100dvh; overflow: hidden; overscroll-behavior: none; 
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #000; color: var(--text-main); display: flex; justify-content: center; height: 100dvh; overflow: hidden; overscroll-behavior: none; }
 
         /* Загрузочный экран */
-        #splash-screen {
-            position: absolute; inset: 0; background: #000; z-index: 9999;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-        #splash-screen.hidden { opacity: 0; transform: scale(1.1); pointer-events: none; }
+        #splash-screen { position: absolute; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.6s ease; }
+        #splash-screen.hidden { opacity: 0; pointer-events: none; }
         .splash-img { width: 85%; max-width: 320px; border-radius: 20px; box-shadow: 0 20px 40px rgba(163, 230, 53, 0.15); margin-bottom: 30px; object-fit: cover;}
         .spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .app-container {
-            width: 100%; height: 100%; background: var(--bg-color); display: flex; flex-direction: column; position: relative; max-width: 480px; 
-            padding-top: env(safe-area-inset-top);
-            background: radial-gradient(circle at top left, #1a1a1a 0%, #0f0f0f 100%);
-        }
+        .app-container { width: 100%; height: 100%; background: var(--bg-color); display: flex; flex-direction: column; position: relative; max-width: 480px; padding-top: env(safe-area-inset-top); background: radial-gradient(circle at top left, #1a1a1a 0%, #0f0f0f 100%); }
 
-        header {
-            padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;
-            background: rgba(15, 15, 15, 0.8); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
-            border-bottom: 1px solid var(--border); z-index: 10; position: sticky; top: 0;
-        }
+        header { padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(15, 15, 15, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); z-index: 10; position: sticky; top: 0; }
         h1 { font-size: 20px; font-weight: 900; font-style: italic; letter-spacing: -0.5px; text-transform: uppercase; line-height: 1.1; }
         .accent-text { color: var(--accent); }
         .subtitle { font-size: 11px; color: var(--text-muted); margin-top: 2px;}
-        .avatar-btn { background: rgba(255,255,255,0.1); color: white; border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 12px; cursor: pointer; transition: 0.2s;}
-        .avatar-btn:active { background: rgba(255,255,255,0.2); transform: scale(0.95); }
+        .avatar-btn { background: rgba(255,255,255,0.1); color: white; border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 12px; cursor: pointer; }
 
         main { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: calc(100px + env(safe-area-inset-bottom)); -webkit-overflow-scrolling: touch; }
         
-        @keyframes slideFadeIn { from { opacity: 0; transform: translateY(20px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes slideFadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes popIn { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
         @keyframes modalSlideUp { from { opacity: 0; transform: translateY(100%); } to { opacity: 1; transform: translateY(0); } }
 
         section { display: none; }
-        section.active { display: block; animation: slideFadeIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        section.active { display: block; animation: slideFadeIn 0.4s ease forwards; }
 
-        .card { 
-            background: var(--card-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
-            border-radius: 20px; padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-        }
+        .card { background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
 
         /* Онбординг */
         .ob-step { display: none; }
         .ob-step.active { display: block; animation: slideFadeIn 0.3s ease; }
-        .ob-option { background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 16px; border-radius: 16px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; font-size: 16px;}
-        .ob-option:active, .ob-option.selected { background: var(--accent); color: #000; border-color: var(--accent); font-weight: bold; transform: scale(0.97); }
-        .ob-progress { height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-bottom: 24px; overflow: hidden; }
-        .ob-progress-fill { height: 100%; background: var(--accent); transition: width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); width: 0%; }
-        
-        .name-input { width: 100%; background: rgba(0,0,0,0.5); border: 2px solid var(--border); border-radius: 16px; padding: 18px; color: white; font-size: 18px; outline: none; margin-bottom: 20px; text-align: center; transition: 0.3s;}
-        .name-input:focus { border-color: var(--accent); box-shadow: 0 0 20px rgba(163, 230, 53, 0.2); }
+        .ob-option { background: #222; border: 1px solid var(--border); padding: 16px; border-radius: 16px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; font-size: 16px;}
+        .ob-option:active, .ob-option.selected { background: var(--accent); color: #000; border-color: var(--accent); font-weight: bold; }
+        .ob-progress { height: 4px; background: #333; border-radius: 2px; margin-bottom: 24px; overflow: hidden; }
+        .ob-progress-fill { height: 100%; background: var(--accent); transition: width 0.4s ease; width: 0%; }
+        .name-input { width: 100%; background: #111; border: 2px solid var(--border); border-radius: 16px; padding: 18px; color: white; font-size: 18px; outline: none; margin-bottom: 20px; text-align: center; }
 
         /* Тепловая карта (New Anatomy) */
         .recovery-card { display: flex; flex-direction: column; gap: 16px; align-items: center; }
-        .anatomy-container { display: flex; gap: 20px; justify-content: center; width: 100%; padding: 10px 0;}
+        .anatomy-container { display: flex; gap: 15px; justify-content: center; width: 100%; padding: 10px 0;}
         .heatmap-svg { width: 130px; height: 260px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5)); }
         
-        /* Базовые стили для SVG */
-        .body-base { fill: #222; stroke: #111; stroke-width: 1; }
-        .muscle-group { transition: fill 0.4s ease, filter 0.4s ease; stroke: #111; stroke-width: 0.5; }
+        /* Стили анатомии */
+        .body-base { fill: #2a2a2a; stroke: #111; stroke-width: 1.5; }
+        .muscle-group { stroke: #111; stroke-width: 1; stroke-linejoin: round; transition: fill 0.4s ease, filter 0.4s ease; }
         
         .recovery-info { width: 100%; }
         .recovery-list { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; font-size: 12px; justify-items: center;}
         .recovery-item { display: flex; align-items: center; gap: 6px; font-weight: 500;}
-        .dot { width: 10px; height: 10px; border-radius: 50%; transition: 0.3s; box-shadow: 0 0 10px rgba(0,0,0,0.5);}
+        .dot { width: 10px; height: 10px; border-radius: 50%; transition: 0.3s; }
         .dot.green { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
         .dot.yellow { background: var(--accent-orange); box-shadow: 0 0 10px var(--accent-orange); }
         .dot.red { background: var(--accent-red); box-shadow: 0 0 10px var(--accent-red); }
@@ -96,102 +72,73 @@
         /* Кольца */
         .rings-container { display: flex; justify-content: space-around; align-items: center; height: 120px; width: 100%; }
         .ring-box { position: relative; width: 100px; height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .ring-svg { width: 90px; height: 90px; transform: rotate(-90deg); overflow: visible; filter: drop-shadow(0 0 8px rgba(0,0,0,0.5)); }
+        .ring-svg { width: 90px; height: 90px; transform: rotate(-90deg); overflow: visible; }
         .ring-bg { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 10; }
-        .ring-fill { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 1s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .ring-fill { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
         .ring-val { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 18px; font-weight: 900; color: #fff; }
-        .ring-label { position: absolute; bottom: -12px; font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;}
+        .ring-label { position: absolute; bottom: -12px; font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: bold; }
 
         /* Тренировка */
-        .workout-selector { display: flex; gap: 10px; overflow-x: auto; margin-bottom: 20px; padding-bottom: 4px; scrollbar-width: none; }
+        .workout-selector { display: flex; gap: 10px; overflow-x: auto; margin-bottom: 20px; scrollbar-width: none; }
         .workout-selector::-webkit-scrollbar { display: none; }
-        .w-tab { padding: 10px 20px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 24px; color: var(--text-muted); font-weight: bold; font-size: 14px; white-space: nowrap; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center;}
-        .w-tab.active { background: var(--accent); color: #000; border-color: var(--accent); box-shadow: 0 4px 15px rgba(163, 230, 53, 0.3); transform: translateY(-2px);}
+        .w-tab { padding: 10px 20px; background: #222; border: 1px solid var(--border); border-radius: 24px; color: var(--text-muted); font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center;}
+        .w-tab.active { background: var(--accent); color: #000; border-color: var(--accent); box-shadow: 0 4px 15px rgba(163, 230, 53, 0.3); }
         .w-tab small { font-size: 11px; font-weight: normal; opacity: 0.8;}
 
-        .timer-box { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.4); border: 1px solid var(--border); padding: 16px 20px; border-radius: 16px; margin-bottom: 20px; }
-        .timer-display { font-family: monospace; font-size: 24px; font-weight: bold; color: var(--accent-orange); text-shadow: 0 0 10px rgba(249, 115, 22, 0.3);}
-        .timer-btn { background: var(--accent-orange); color: white; border: none; padding: 8px 16px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s;}
-        .timer-btn:active { transform: scale(0.95); }
+        .timer-box { display: flex; justify-content: space-between; align-items: center; background: #111; border: 1px solid var(--border); padding: 16px 20px; border-radius: 16px; margin-bottom: 20px; }
+        .timer-display { font-family: monospace; font-size: 24px; font-weight: bold; color: var(--accent-orange); }
+        .timer-btn { background: var(--accent-orange); color: white; border: none; padding: 8px 16px; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
-        .set-row { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; margin-bottom: 10px; position: relative; overflow: hidden; transition: 0.2s; border: 1px solid transparent;}
-        .set-row:focus-within { border-color: var(--border); background: rgba(0,0,0,0.5); }
-        
-        .set-num { color: var(--text-muted); font-size: 14px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; text-align: center; border-radius: 8px; cursor: pointer; font-weight: bold; border: 1px solid var(--border); transition: 0.2s;}
-        .set-row.tag-warmup .set-num { background: #555; color: #ccc; border-color: #555; }
+        .set-row { display: flex; align-items: center; justify-content: space-between; background: #111; padding: 12px; border-radius: 12px; margin-bottom: 10px; border: 1px solid transparent;}
+        .set-num { color: var(--text-muted); font-size: 14px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; font-weight: bold; border: 1px solid var(--border);}
+        .set-row.tag-warmup .set-num { background: #555; color: #ccc; }
         .set-row.tag-failure .set-num { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); border-color: var(--accent-red); }
         .set-row.tag-drop .set-num { background: rgba(249, 115, 22, 0.2); color: var(--accent-orange); border-color: var(--accent-orange); }
-        .set-row.tag-warmup { opacity: 0.6; }
-
-        .set-input { background: transparent; border: none; border-bottom: 2px solid var(--border); color: white; font-weight: bold; font-size: 16px; text-align: center; width: 65px; padding: 4px; outline: none; -webkit-appearance: none; margin: 0; transition: 0.2s;}
+        .set-input { background: transparent; border: none; border-bottom: 2px solid var(--border); color: white; font-weight: bold; font-size: 16px; text-align: center; width: 65px; padding: 4px; outline: none; }
         .set-input:focus { border-bottom-color: var(--accent); }
-        
-        .btn-check { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--border); background: transparent; color: transparent; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: 0.2s; }
-        .btn-check.done { background: var(--accent); border-color: var(--accent); color: #000; animation: popIn 0.3s ease; box-shadow: 0 0 15px rgba(163, 230, 53, 0.4); }
+        .btn-check { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--border); background: transparent; color: transparent; cursor: pointer; }
+        .btn-check.done { background: var(--accent); border-color: var(--accent); color: #000; animation: popIn 0.3s ease; }
 
         .ex-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
         .ex-title { font-size: 18px; font-weight: bold; }
         .ex-target { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
-        .ex-history { font-size: 12px; color: var(--accent); font-style: italic; margin-bottom: 12px; display: block; background: rgba(163, 230, 53, 0.1); padding: 4px 8px; border-radius: 6px; width: fit-content;}
-        .action-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text-main); width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; transition: 0.2s; }
-        .action-btn:active { background: var(--accent); color: #000; transform: scale(0.9); }
+        .ex-history { font-size: 12px; color: var(--accent); font-style: italic; margin-bottom: 12px; display: inline-block; background: rgba(163, 230, 53, 0.1); padding: 4px 8px; border-radius: 6px; }
+        .action-btn { background: #222; border: 1px solid var(--border); color: var(--text-main); width: 36px; height: 36px; border-radius: 10px; cursor: pointer; font-size: 16px; }
 
-        #rest-timer-bar { display: none; position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(100px); width: 90%; background: rgba(249, 115, 22, 0.95); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); color: white; padding: 16px 24px; justify-content: space-between; align-items: center; z-index: 50; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); opacity: 0; transition: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        #rest-timer-bar { display: none; position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(100px); width: 90%; background: var(--accent-orange); color: white; padding: 16px 24px; justify-content: space-between; align-items: center; z-index: 50; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: 0.3s ease; opacity: 0; }
         #rest-timer-bar.active { display: flex; transform: translateX(-50%) translateY(0); opacity: 1; }
         .rest-time { font-size: 28px; font-weight: 900; font-family: monospace; }
 
         /* Статистика */
-        .chart-container { height: 160px; display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; padding-top: 20px; border-bottom: 2px solid var(--border); border-left: 2px solid var(--border); margin-bottom: 20px; position: relative;}
-        .chart-bar { flex: 1; background: linear-gradient(to top, var(--accent-orange), var(--accent)); border-radius: 6px 6px 0 0; position: relative; min-height: 5px; transition: height 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 0 10px rgba(163, 230, 53, 0.2);}
-        .chart-value { position: absolute; top: -24px; left: 50%; transform: translateX(-50%); font-size: 12px; font-weight: bold; color: white; }
+        .chart-container { height: 160px; display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; padding-top: 20px; border-bottom: 2px solid var(--border); border-left: 2px solid var(--border); margin-bottom: 20px; }
+        .chart-bar { flex: 1; background: linear-gradient(to top, var(--accent-orange), var(--accent)); border-radius: 6px 6px 0 0; position: relative; transition: height 0.8s ease; }
+        .chart-value { position: absolute; top: -24px; left: 50%; transform: translateX(-50%); font-size: 12px; font-weight: bold; }
         .chart-label { position: absolute; bottom: -24px; left: 50%; transform: translateX(-50%); font-size: 11px; color: var(--text-muted); }
 
-        .btn { width: 100%; padding: 16px; border-radius: 16px; font-weight: bold; font-size: 16px; border: none; cursor: pointer; transition: transform 0.1s, box-shadow 0.3s; display: flex; justify-content: center; align-items: center; -webkit-appearance: none;}
-        .btn:active { transform: scale(0.96); }
-        .btn-primary { background: var(--accent); color: #000; box-shadow: 0 8px 25px rgba(163, 230, 53, 0.3); }
+        .btn { width: 100%; padding: 16px; border-radius: 16px; font-weight: bold; font-size: 16px; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.2s;}
+        .btn-primary { background: var(--accent); color: #000; }
         .btn-outline { background: transparent; border: 2px dashed var(--border); color: var(--text-muted); margin-top: 10px;}
-        .btn:active.btn-primary { box-shadow: 0 4px 15px rgba(163, 230, 53, 0.5); }
 
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .stat-card { text-align: center; padding: 24px 10px; }
-        .stat-val { font-size: 32px; font-weight: 900; transition: 0.3s; text-shadow: 0 0 20px rgba(255,255,255,0.1);}
+        .stat-val { font-size: 32px; font-weight: 900; }
         .stat-lbl { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
         
-        .food-btn { text-align: left; padding: 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 16px; color: white; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 12px; -webkit-appearance: none;}
-        .food-btn:active { background: rgba(255,255,255,0.1); transform: scale(0.97); }
-        .food-title { font-weight: bold; font-size: 14px; line-height: 1.2; }
-        .food-desc { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+        .food-btn { text-align: left; padding: 14px; background: #222; border: 1px solid var(--border); border-radius: 16px; color: white; display: flex; align-items: center; gap: 12px;}
+        .food-title { font-weight: bold; font-size: 14px; }
+        .food-desc { font-size: 12px; color: var(--text-muted); }
 
-        .progress-bg { background: rgba(255,255,255,0.1); height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 16px; }
-        .progress-fill { height: 100%; border-radius: 5px; transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        .fill-kcal { background: linear-gradient(90deg, #ef4444, #f97316); width: 0%; box-shadow: 0 0 10px rgba(249, 115, 22, 0.5); }
-        .fill-protein { background: linear-gradient(90deg, #84cc16, #a3e635); width: 0%; box-shadow: 0 0 10px rgba(163, 230, 53, 0.5); }
+        .search-box, .modal-input { width: 100%; background: #111; border: 1px solid var(--border); border-radius: 14px; padding: 14px 18px; color: white; font-size: 16px; outline: none; margin-bottom: 16px;}
 
-        .search-box, .modal-input { width: 100%; background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 14px; padding: 14px 18px; color: white; font-size: 16px; outline: none; -webkit-appearance: none; transition: 0.3s;}
-        .search-box { margin-bottom: 20px; }
-        .modal-input { margin-bottom: 16px; }
-        .search-box:focus, .modal-input:focus { border-color: var(--accent); box-shadow: 0 0 15px rgba(163, 230, 53, 0.1); }
-
-        nav { 
-            position: absolute; bottom: 0; width: 100%; 
-            background: rgba(15, 15, 15, 0.85); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
-            border-top: 1px solid var(--border); display: flex; justify-content: space-around; 
-            padding-bottom: env(safe-area-inset-bottom); z-index: 40; 
-        }
-        .nav-item { flex: 1; padding: 14px 0; display: flex; flex-direction: column; align-items: center; background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 11px; font-weight: bold; gap: 6px; -webkit-appearance: none; transition: 0.2s;}
+        nav { position: absolute; bottom: 0; width: 100%; background: rgba(15, 15, 15, 0.9); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); z-index: 40; }
+        .nav-item { flex: 1; padding: 14px 0; display: flex; flex-direction: column; align-items: center; background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 11px; font-weight: bold; gap: 6px;}
         .nav-item.active { color: var(--accent); }
-        .nav-icon { font-size: 22px; line-height: 1; transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);}
-        .nav-item.active .nav-icon { transform: translateY(-4px) scale(1.1); }
+        .nav-icon { font-size: 22px; }
 
-        .modal { position: absolute; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: none; align-items: flex-end; justify-content: center; z-index: 100; }
+        .modal { position: absolute; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: flex-end; justify-content: center; z-index: 100; }
         .modal.active { display: flex; }
-        .modal-content { 
-            background: #1a1a1a; padding: 32px 24px; border-radius: 32px 32px 0 0; width: 100%; max-width: 480px; border: 1px solid var(--border); border-bottom: none;
-            max-height: 90vh; overflow-y: auto; animation: modalSlideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-            padding-bottom: calc(32px + env(safe-area-inset-bottom));
-        }
+        .modal-content { background: #1a1a1a; padding: 32px 24px; border-radius: 32px 32px 0 0; width: 100%; max-width: 480px; border: 1px solid var(--border); animation: modalSlideUp 0.3s ease; padding-bottom: calc(32px + env(safe-area-inset-bottom)); }
         
-        ::-webkit-scrollbar { display: none; }
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
@@ -257,89 +204,108 @@
                     <h3 style="font-size: 18px; margin-bottom: 16px;">Восстановление</h3>
                     <div class="recovery-card">
                         <div class="anatomy-container">
-                            <!-- Детализированный SVG: Вид спереди -->
+                            <!-- Вид спереди -->
                             <svg class="heatmap-svg" viewBox="0 0 200 400" xmlns="http://www.w3.org/2000/svg">
                                 <defs>
-                                    <linearGradient id="rest-front" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" stop-color="#3f1f0f"/>
-                                        <stop offset="50%" stop-color="#261008"/>
-                                        <stop offset="100%" stop-color="#120502"/>
-                                    </linearGradient>
+                                    <radialGradient id="grad-chest" cx="50%" cy="50%" r="50%">
+                                        <stop offset="0%" stop-color="#ef4444"/>
+                                        <stop offset="100%" stop-color="#991b1b"/>
+                                    </radialGradient>
+                                    <radialGradient id="grad-abs" cx="50%" cy="50%" r="50%">
+                                        <stop offset="0%" stop-color="#f97316"/>
+                                        <stop offset="100%" stop-color="#9a3412"/>
+                                    </radialGradient>
+                                    <radialGradient id="grad-legs" cx="50%" cy="50%" r="50%">
+                                        <stop offset="0%" stop-color="#e11d48"/>
+                                        <stop offset="100%" stop-color="#881337"/>
+                                    </radialGradient>
+                                    <radialGradient id="grad-arms" cx="50%" cy="50%" r="50%">
+                                        <stop offset="0%" stop-color="#fb7185"/>
+                                        <stop offset="100%" stop-color="#be123c"/>
+                                    </radialGradient>
                                 </defs>
                                 
-                                <!-- Силуэт -->
+                                <!-- Контур тела -->
                                 <path class="body-base" d="M 80 30 Q 100 20 120 30 L 130 50 L 150 60 L 170 100 L 160 160 L 140 180 L 150 260 L 140 380 L 110 380 L 100 280 L 90 380 L 60 380 L 50 260 L 60 180 L 40 160 L 30 100 L 50 60 L 70 50 Z" />
                                 
                                 <!-- Голова и шея -->
-                                <ellipse cx="100" cy="40" rx="20" ry="25" fill="#222" stroke="#111" />
-                                <path d="M 85 60 L 115 60 L 120 80 L 80 80 Z" fill="#222" stroke="#111"/>
-                                <path id="m-traps-front" class="muscle-group" d="M 80 80 Q 100 70 120 80 L 130 100 L 70 100 Z" fill="url(#rest-front)" />
+                                <ellipse cx="100" cy="40" rx="20" ry="25" fill="#2a2a2a" stroke="#111" stroke-width="2" />
+                                <path d="M 85 60 L 115 60 L 120 80 L 80 80 Z" fill="#2a2a2a" stroke="#111" stroke-width="2"/>
+                                <path id="m-traps-front" class="muscle-group" d="M 80 80 Q 100 70 120 80 L 130 100 L 70 100 Z" fill="url(#grad-arms)" />
                                 
-                                <!-- Грудь -->
-                                <path id="m-chest" class="muscle-group" d="M 70 100 C 90 95 110 95 130 100 C 140 120 130 150 100 150 C 70 150 60 120 70 100 Z" fill="url(#rest-front)" />
-                                <path d="M 100 95 L 100 145" stroke="#111" stroke-width="2" opacity="0.5"/>
+                                <!-- Грудные мышцы (ПРАВАЯ И ЛЕВАЯ) -->
+                                <path id="m-chest-r" class="muscle-group" d="M 100 95 C 120 90 135 100 135 120 C 135 140 120 150 100 150 Z" fill="url(#grad-chest)" />
+                                <path id="m-chest-l" class="muscle-group" d="M 100 95 C 80 90 65 100 65 120 C 65 140 80 150 100 150 Z" fill="url(#grad-chest)" />
+                                <path d="M 100 95 L 100 150" stroke="#111" stroke-width="2" opacity="0.6"/>
                                 
-                                <!-- Плечи -->
-                                <path id="m-shoulders-front" class="muscle-group" d="M 50 80 C 60 70 70 90 65 110 C 55 120 40 100 50 80 Z M 150 80 C 140 70 130 90 135 110 C 145 120 160 100 150 80 Z" fill="url(#rest-front)" />
+                                <!-- Плечи (Дельты) -->
+                                <path id="m-shoulders-front-l" class="muscle-group" d="M 50 80 C 60 70 70 90 65 110 C 55 120 40 100 50 80 Z" fill="url(#grad-arms)" />
+                                <path id="m-shoulders-front-r" class="muscle-group" d="M 150 80 C 140 70 130 90 135 110 C 145 120 160 100 150 80 Z" fill="url(#grad-arms)" />
                                 
-                                <!-- Пресс -->
-                                <path id="m-abs" class="muscle-group" d="M 80 155 L 120 155 L 115 220 L 100 230 L 85 220 Z" fill="url(#rest-front)" />
-                                <!-- Кубики -->
-                                <path d="M 80 175 L 120 175 M 80 195 L 120 195 M 100 155 L 100 230" stroke="#111" stroke-width="2" opacity="0.4"/>
+                                <!-- Пресс (Кубики) -->
+                                <path id="m-abs" class="muscle-group" d="M 80 155 L 120 155 L 115 220 L 100 230 L 85 220 Z" fill="url(#grad-abs)" />
+                                <path d="M 80 175 L 120 175 M 80 195 L 120 195 M 100 155 L 100 230" stroke="#111" stroke-width="2" opacity="0.5"/>
                                 
                                 <!-- Косые -->
-                                <path id="m-obliques" class="muscle-group" d="M 65 150 L 78 160 L 82 220 L 60 200 Z M 135 150 L 122 160 L 118 220 L 140 200 Z" fill="url(#rest-front)" />
+                                <path id="m-obliques" class="muscle-group" d="M 65 150 L 78 160 L 82 220 L 60 200 Z M 135 150 L 122 160 L 118 220 L 140 200 Z" fill="url(#grad-abs)" />
                                 
                                 <!-- Бицепс -->
-                                <path id="m-biceps" class="muscle-group" d="M 45 110 C 55 100 60 140 50 160 C 40 150 35 120 45 110 Z M 155 110 C 145 100 140 140 150 160 C 160 150 165 120 155 110 Z" fill="url(#rest-front)" />
+                                <path id="m-biceps-l" class="muscle-group" d="M 45 110 C 55 100 60 140 50 160 C 40 150 35 120 45 110 Z" fill="url(#grad-arms)" />
+                                <path id="m-biceps-r" class="muscle-group" d="M 155 110 C 145 100 140 140 150 160 C 160 150 165 120 155 110 Z" fill="url(#grad-arms)" />
                                 
                                 <!-- Квадрицепс -->
-                                <path id="m-quads" class="muscle-group" d="M 60 230 C 80 220 95 250 95 300 L 60 320 Z M 140 230 C 120 220 105 250 105 300 L 140 320 Z" fill="url(#rest-front)" />
+                                <path id="m-quads-l" class="muscle-group" d="M 60 230 C 80 220 95 250 95 300 L 60 320 Z" fill="url(#grad-legs)" />
+                                <path id="m-quads-r" class="muscle-group" d="M 140 230 C 120 220 105 250 105 300 L 140 320 Z" fill="url(#grad-legs)" />
                                 <path d="M 75 250 L 75 300 M 125 250 L 125 300" stroke="#111" stroke-width="1.5" opacity="0.4"/>
                                 
                                 <!-- Голени -->
-                                <path id="m-calves-front" class="muscle-group" d="M 60 330 L 85 320 L 90 370 L 65 370 Z M 140 330 L 115 320 L 110 370 L 135 370 Z" fill="url(#rest-front)" />
+                                <path id="m-calves-front" class="muscle-group" d="M 60 330 L 85 320 L 90 370 L 65 370 Z M 140 330 L 115 320 L 110 370 L 135 370 Z" fill="url(#grad-legs)" />
                             </svg>
                             
-                            <!-- Детализированный SVG: Вид сзади -->
+                            <!-- Вид сзади -->
                             <svg class="heatmap-svg" viewBox="0 0 200 400" xmlns="http://www.w3.org/2000/svg">
                                 <defs>
-                                    <linearGradient id="rest-back" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" stop-color="#2a1508"/>
-                                        <stop offset="100%" stop-color="#0f0501"/>
-                                    </linearGradient>
+                                    <radialGradient id="grad-back" cx="50%" cy="50%" r="50%">
+                                        <stop offset="0%" stop-color="#be123c"/>
+                                        <stop offset="100%" stop-color="#4c0519"/>
+                                    </radialGradient>
+                                    <radialGradient id="grad-glutes" cx="50%" cy="50%" r="50%">
+                                        <stop offset="0%" stop-color="#f43f5e"/>
+                                        <stop offset="100%" stop-color="#881337"/>
+                                    </radialGradient>
                                 </defs>
                                 
-                                <!-- Силуэт -->
+                                <!-- Контур тела -->
                                 <path class="body-base" d="M 80 30 Q 100 20 120 30 L 130 50 L 150 60 L 170 100 L 160 160 L 140 180 L 150 260 L 140 380 L 110 380 L 100 280 L 90 380 L 60 380 L 50 260 L 60 180 L 40 160 L 30 100 L 50 60 L 70 50 Z" />
                                 
                                 <!-- Голова и шея -->
-                                <ellipse cx="100" cy="40" rx="20" ry="25" fill="#222" stroke="#111" />
-                                <path d="M 85 60 L 115 60 L 120 80 L 80 80 Z" fill="#222" stroke="#111"/>
+                                <ellipse cx="100" cy="40" rx="20" ry="25" fill="#2a2a2a" stroke="#111" stroke-width="2" />
+                                <path d="M 85 60 L 115 60 L 120 80 L 80 80 Z" fill="#2a2a2a" stroke="#111" stroke-width="2"/>
                                 
                                 <!-- Трапеция -->
-                                <path id="m-traps" class="muscle-group" d="M 70 80 C 100 60 100 60 130 80 L 120 110 L 80 110 Z" fill="url(#rest-back)" />
+                                <path id="m-traps" class="muscle-group" d="M 70 80 C 100 60 100 60 130 80 L 120 110 L 80 110 Z" fill="url(#grad-back)" />
                                 
                                 <!-- Широчайшие -->
-                                <path id="m-lats" class="muscle-group" d="M 55 95 C 75 85 90 110 95 150 L 65 160 Z M 145 95 C 125 85 110 110 105 150 L 135 160 Z" fill="url(#rest-back)" />
+                                <path id="m-lats" class="muscle-group" d="M 55 95 C 75 85 90 110 95 150 L 65 160 Z M 145 95 C 125 85 110 110 105 150 L 135 160 Z" fill="url(#grad-back)" />
                                 
                                 <!-- Плечи сзади -->
-                                <path id="m-shoulders-back" class="muscle-group" d="M 50 80 C 60 70 70 90 65 110 C 55 120 40 100 50 80 Z M 150 80 C 140 70 130 90 135 110 C 145 120 160 100 150 80 Z" fill="url(#rest-back)" />
+                                <path id="m-shoulders-back" class="muscle-group" d="M 50 80 C 60 70 70 90 65 110 C 55 120 40 100 50 80 Z M 150 80 C 140 70 130 90 135 110 C 145 120 160 100 150 80 Z" fill="url(#grad-arms)" />
                                 
                                 <!-- Трицепс -->
-                                <path id="m-triceps" class="muscle-group" d="M 45 110 C 55 100 60 140 50 160 C 40 150 35 120 45 110 Z M 155 110 C 145 100 140 140 150 160 C 160 150 165 120 155 110 Z" fill="url(#rest-back)" />
+                                <path id="m-triceps" class="muscle-group" d="M 45 110 C 55 100 60 140 50 160 C 40 150 35 120 45 110 Z M 155 110 C 145 100 140 140 150 160 C 160 150 165 120 155 110 Z" fill="url(#grad-arms)" />
                                 
                                 <!-- Поясница -->
-                                <path id="m-lower-back" class="muscle-group" d="M 85 150 L 115 150 L 110 200 L 90 200 Z" fill="url(#rest-back)" />
+                                <path id="m-lower-back" class="muscle-group" d="M 85 150 L 115 150 L 110 200 L 90 200 Z" fill="url(#grad-back)" />
                                 
                                 <!-- Ягодицы -->
-                                <path id="m-glutes" class="muscle-group" d="M 60 200 C 80 190 100 190 100 230 C 80 250 60 230 60 200 Z M 140 200 C 120 190 100 190 100 230 C 120 250 140 230 140 200 Z" fill="url(#rest-back)" />
+                                <path id="m-glutes-l" class="muscle-group" d="M 60 200 C 80 190 100 190 100 230 C 80 250 60 230 60 200 Z" fill="url(#grad-glutes)" />
+                                <path id="m-glutes-r" class="muscle-group" d="M 140 200 C 120 190 100 190 100 230 C 120 250 140 230 140 200 Z" fill="url(#grad-glutes)" />
                                 
                                 <!-- Бицепс бедра -->
-                                <path id="m-hamstrings" class="muscle-group" d="M 60 240 C 80 230 95 260 90 300 L 65 320 Z M 140 240 C 120 230 105 260 110 300 L 135 320 Z" fill="url(#rest-back)" />
+                                <path id="m-hamstrings" class="muscle-group" d="M 60 240 C 80 230 95 260 90 300 L 65 320 Z M 140 240 C 120 230 105 260 110 300 L 135 320 Z" fill="url(#grad-legs)" />
                                 
                                 <!-- Икры сзади -->
-                                <path id="m-calves-back" class="muscle-group" d="M 60 330 L 85 320 L 90 370 L 65 370 Z M 140 330 L 115 320 L 110 370 L 135 370 Z" fill="url(#rest-back)" />
+                                <path id="m-calves-back" class="muscle-group" d="M 60 330 L 85 320 L 90 370 L 65 370 Z M 140 330 L 115 320 L 110 370 L 135 370 Z" fill="url(#grad-legs)" />
                             </svg>
                         </div>
                         <div class="recovery-info">
@@ -382,7 +348,7 @@
             <section id="view-stats">
                 <h2 style="font-size: 24px; margin-bottom: 24px; font-weight: 900;">Статистика</h2>
                 <div class="card">
-                    <select id="stats-exercise" style="width: 100%; padding: 14px; background: rgba(0,0,0,0.5); color: white; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 20px; font-size: 16px; outline: none;" onchange="renderChart()">
+                    <select id="stats-exercise" style="width: 100%; padding: 14px; background: #111; color: white; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 20px; font-size: 16px; outline: none;" onchange="renderChart()">
                         <option value="Жим штанги лежа">Жим штанги лежа</option>
                         <option value="Присед со штангой">Присед со штангой</option>
                         <option value="Становая тяга">Становая тяга</option>
@@ -419,15 +385,15 @@
         </nav>
 
         <!-- МОДАЛКИ -->
-        <div id="modal-calc" class="modal"><div class="modal-content"><div style="width: 40px; height: 4px; background: #333; border-radius: 2px; margin: 0 auto 20px;"></div><h3 style="margin-bottom: 20px; font-size: 22px;">Калькулятор 1ПМ</h3><div style="display: flex; gap: 12px;"><input type="number" id="calc-weight" class="modal-input" placeholder="Вес (кг)"><input type="number" id="calc-reps" class="modal-input" placeholder="Повторы"></div><button class="btn btn-primary" onclick="runCalculator()">Рассчитать</button><div id="calc-result" style="display: none; background: rgba(0,0,0,0.4); padding: 20px; border-radius: 16px; margin-top: 16px;"><div id="calc-1rm" style="font-size: 28px; font-weight: bold; color: var(--accent);"></div><div id="calc-warmup" style="font-size: 15px; margin-top: 12px; color: #ccc; line-height: 1.5;"></div></div><button class="btn" style="background: rgba(255,255,255,0.1); color: white; margin-top: 16px;" onclick="closeModal('modal-calc')">Закрыть</button></div></div>
+        <div id="modal-calc" class="modal"><div class="modal-content"><div style="width: 40px; height: 4px; background: #333; border-radius: 2px; margin: 0 auto 20px;"></div><h3 style="margin-bottom: 20px; font-size: 22px;">Калькулятор 1ПМ</h3><div style="display: flex; gap: 12px;"><input type="number" id="calc-weight" class="modal-input" placeholder="Вес (кг)"><input type="number" id="calc-reps" class="modal-input" placeholder="Повторы"></div><button class="btn btn-primary" onclick="runCalculator()">Рассчитать</button><div id="calc-result" style="display: none; background: #111; padding: 20px; border-radius: 16px; margin-top: 16px;"><div id="calc-1rm" style="font-size: 28px; font-weight: bold; color: var(--accent);"></div><div id="calc-warmup" style="font-size: 15px; margin-top: 12px; color: #ccc;"></div></div><button class="btn" style="background: #333; color: white; margin-top: 16px;" onclick="closeModal('modal-calc')">Закрыть</button></div></div>
 
-        <div id="modal-ex-info" class="modal"><div class="modal-content"><div style="width: 40px; height: 4px; background: #333; border-radius: 2px; margin: 0 auto 20px;"></div><h3 id="info-ex-name" style="margin-bottom: 8px; font-size: 24px;">Упражнение</h3><div style="font-size: 15px; color: var(--text-muted); margin-bottom: 24px;">Инвентарь: <span id="info-ex-equip" style="color: white; font-weight: bold;">-</span></div><button id="info-ex-video-btn" class="btn btn-primary" style="margin-bottom: 12px;">▶ Смотреть технику</button><button class="btn" style="background: rgba(255,255,255,0.1); color: white;" onclick="closeModal('modal-ex-info')">Закрыть</button></div></div>
+        <div id="modal-ex-info" class="modal"><div class="modal-content"><div style="width: 40px; height: 4px; background: #333; border-radius: 2px; margin: 0 auto 20px;"></div><h3 id="info-ex-name" style="margin-bottom: 8px; font-size: 24px;">Упражнение</h3><div style="font-size: 15px; color: var(--text-muted); margin-bottom: 24px;">Инвентарь: <span id="info-ex-equip" style="color: white; font-weight: bold;">-</span></div><button id="info-ex-video-btn" class="btn btn-primary" style="margin-bottom: 12px;">▶ Смотреть технику</button><button class="btn" style="background: #333; color: white;" onclick="closeModal('modal-ex-info')">Закрыть</button></div></div>
 
-        <div id="modal-add-ex" class="modal"><div class="modal-content"><div style="width: 40px; height: 4px; background: #333; border-radius: 2px; margin: 0 auto 20px;"></div><h3 style="margin-bottom: 20px; font-size: 22px;">Новое упражнение</h3><input type="text" id="add-name" class="modal-input" placeholder="Название"><div style="display: flex; gap: 12px;"><input type="number" id="add-sets" class="modal-input" placeholder="Подходы (4)"><input type="text" id="add-reps" class="modal-input" placeholder="Повторы (6-8)"></div><div style="display: flex; gap: 12px; margin-top: 12px;"><button class="btn" style="background: rgba(255,255,255,0.1); color: white;" onclick="closeModal('modal-add-ex')">Отмена</button><button class="btn btn-primary" onclick="addCustomExercise()">Добавить</button></div></div></div>
+        <div id="modal-add-ex" class="modal"><div class="modal-content"><div style="width: 40px; height: 4px; background: #333; border-radius: 2px; margin: 0 auto 20px;"></div><h3 style="margin-bottom: 20px; font-size: 22px;">Новое упражнение</h3><input type="text" id="add-name" class="modal-input" placeholder="Название"><div style="display: flex; gap: 12px;"><input type="number" id="add-sets" class="modal-input" placeholder="Подходы (4)"><input type="text" id="add-reps" class="modal-input" placeholder="Повторы (6-8)"></div><div style="display: flex; gap: 12px; margin-top: 12px;"><button class="btn" style="background: #333; color: white;" onclick="closeModal('modal-add-ex')">Отмена</button><button class="btn btn-primary" onclick="addCustomExercise()">Добавить</button></div></div></div>
 
-        <div id="modal-food" class="modal"><div class="modal-content"><div style="width: 40px; height: 4px; background: #333; border-radius: 2px; margin: 0 auto 20px;"></div><h3 id="food-modal-title" style="margin-bottom: 20px; font-size: 22px;">Продукт</h3><input type="number" id="food-grams" class="modal-input" value="100" oninput="updateFoodCalc()"><div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 20px; display: flex; justify-content: space-around;"><div><div style="font-size: 24px; font-weight: bold; color: var(--accent-orange);" id="food-calc-kcal">0</div><div style="font-size: 13px; color: var(--text-muted);">ккал</div></div><div><div style="font-size: 24px; font-weight: bold; color: var(--accent);" id="food-calc-prot">0</div><div style="font-size: 13px; color: var(--text-muted);">белка</div></div></div><div style="display: flex; gap: 12px;"><button class="btn" style="background: rgba(255,255,255,0.1); color: white;" onclick="closeModal('modal-food')">Отмена</button><button class="btn btn-primary" onclick="confirmAddFood()">Добавить</button></div></div></div>
+        <div id="modal-food" class="modal"><div class="modal-content"><div style="width: 40px; height: 4px; background: #333; border-radius: 2px; margin: 0 auto 20px;"></div><h3 id="food-modal-title" style="margin-bottom: 20px; font-size: 22px;">Продукт</h3><input type="number" id="food-grams" class="modal-input" value="100" oninput="updateFoodCalc()"><div style="background: #111; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 20px; display: flex; justify-content: space-around;"><div><div style="font-size: 24px; font-weight: bold; color: var(--accent-orange);" id="food-calc-kcal">0</div><div style="font-size: 13px; color: var(--text-muted);">ккал</div></div><div><div style="font-size: 24px; font-weight: bold; color: var(--accent);" id="food-calc-prot">0</div><div style="font-size: 13px; color: var(--text-muted);">белка</div></div></div><div style="display: flex; gap: 12px;"><button class="btn" style="background: #333; color: white;" onclick="closeModal('modal-food')">Отмена</button><button class="btn btn-primary" onclick="confirmAddFood()">Добавить</button></div></div></div>
 
-        <div id="modal-profile" class="modal"><div class="modal-content"><div style="width: 40px; height: 4px; background: #333; border-radius: 2px; margin: 0 auto 20px;"></div><h3 style="margin-bottom: 20px; font-size: 22px;">Профиль</h3><div id="profile-details" style="margin-bottom: 24px; font-size: 15px; line-height: 1.8; color: #ccc;"></div><button class="btn" style="background: rgba(239, 68, 68, 0.2); color: var(--accent-red);" onclick="resetProfile()">Сбросить профиль</button><button class="btn" style="background: rgba(255,255,255,0.1); color: white; margin-top: 12px;" onclick="closeModal('modal-profile')">Закрыть</button></div></div>
+        <div id="modal-profile" class="modal"><div class="modal-content"><div style="width: 40px; height: 4px; background: #333; border-radius: 2px; margin: 0 auto 20px;"></div><h3 style="margin-bottom: 20px; font-size: 22px;">Профиль</h3><div id="profile-details" style="margin-bottom: 24px; font-size: 15px; line-height: 1.8; color: #ccc;"></div><button class="btn" style="background: rgba(239, 68, 68, 0.2); color: var(--accent-red);" onclick="resetProfile()">Сбросить профиль</button><button class="btn" style="background: #333; color: white; margin-top: 12px;" onclick="closeModal('modal-profile')">Закрыть</button></div></div>
     </div>
 
     <script>
@@ -463,13 +429,13 @@
         window.addEventListener('load', () => { setTimeout(() => { document.getElementById('splash-screen').classList.add('hidden'); }, 2000); });
 
         function loadData() {
-            const saved = localStorage.getItem('ktoSdohTotLohV32'); 
+            const saved = localStorage.getItem('ktoSdohTotLohV33'); 
             if (saved) { 
                 state = JSON.parse(saved); 
                 if(state.profile) { startApp(); if(state.isTimerRunning && state.timerStartTime) startTimerLogic(); else updateTimerDisplay(); } else showOnboarding(); 
             } else showOnboarding();
         }
-        function saveData() { localStorage.setItem('ktoSdohTotLohV32', JSON.stringify(state)); }
+        function saveData() { localStorage.setItem('ktoSdohTotLohV33', JSON.stringify(state)); }
         function createEmptySets(count) { return Array.from({ length: count }, () => ({ w: '', r: '', done: false, tag: 'normal' })); }
 
         let currentObStep = 1;
@@ -532,18 +498,23 @@
         function renderHeatmap() {
             const now = Date.now(); const list = document.getElementById('recovery-list'); list.innerHTML = ''; 
             
-            // Сброс к дефолтным градиентам (реалистичный вид)
+            // Сброс к ярким базовым градиентам
             document.querySelectorAll('.muscle-group').forEach(el => {
-                if(el.id.includes('front')) el.setAttribute('fill', 'url(#rest-front)');
-                else el.setAttribute('fill', 'url(#rest-back)');
+                if(el.id.includes('chest')) el.setAttribute('fill', 'url(#grad-chest)');
+                else if(el.id.includes('abs') || el.id.includes('obliques')) el.setAttribute('fill', 'url(#grad-abs)');
+                else if(el.id.includes('quads') || el.id.includes('calves') || el.id.includes('hamstrings')) el.setAttribute('fill', 'url(#grad-legs)');
+                else if(el.id.includes('glutes')) el.setAttribute('fill', 'url(#grad-glutes)');
+                else if(el.id.includes('back') || el.id.includes('lats')) el.setAttribute('fill', 'url(#grad-back)');
+                else el.setAttribute('fill', 'url(#grad-arms)');
+                el.style.filter = 'none';
             });
 
             const muscles = [
-                { id: 'chest', name: 'Грудь', targets: ['m-chest'] }, 
+                { id: 'chest', name: 'Грудь', targets: ['m-chest-r', 'm-chest-l'] }, 
                 { id: 'back', name: 'Спина', targets: ['m-lats', 'm-traps', 'm-lower-back'] },
-                { id: 'quads', name: 'Ноги', targets: ['m-quads', 'm-calves-front', 'm-calves-back', 'm-hamstrings', 'm-glutes'] }, 
-                { id: 'shoulders', name: 'Плечи', targets: ['m-shoulders-front', 'm-shoulders-back'] },
-                { id: 'arms', name: 'Руки', targets: ['m-biceps', 'm-triceps'] }, 
+                { id: 'quads', name: 'Ноги', targets: ['m-quads-l', 'm-quads-r', 'm-calves-front', 'm-calves-back', 'm-hamstrings', 'm-glutes-l', 'm-glutes-r'] }, 
+                { id: 'shoulders', name: 'Плечи', targets: ['m-shoulders-front-l', 'm-shoulders-front-r', 'm-shoulders-back'] },
+                { id: 'arms', name: 'Руки', targets: ['m-biceps-l', 'm-biceps-r', 'm-triceps'] }, 
                 { id: 'core', name: 'Пресс', targets: ['m-abs', 'm-obliques'] }
             ];
             
@@ -559,18 +530,12 @@
                     if(el) {
                         if (color !== 'gray') {
                             el.setAttribute('fill', colorHex);
-                            // Добавляем легкое свечение активным мышцам
-                            if (daysAgo < 1) el.style.filter = 'drop-shadow(0 0 5px rgba(239, 68, 68, 0.8))';
-                            else if (daysAgo < 2) el.style.filter = 'drop-shadow(0 0 5px rgba(249, 115, 22, 0.8))';
-                            else el.style.filter = 'none';
-                        } else {
-                            if(tid.includes('front')) el.setAttribute('fill', 'url(#rest-front)');
-                            else el.setAttribute('fill', 'url(#rest-back)');
-                            el.style.filter = 'none';
+                            if (daysAgo < 1) el.style.filter = 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.8))';
+                            else if (daysAgo < 2) el.style.filter = 'drop-shadow(0 0 8px rgba(249, 115, 22, 0.8))';
                         }
                     } 
                 });
-                list.innerHTML += `<div class="recovery-item"><div class="dot ${color === 'gray' ? '' : color}" style="${color === 'gray' ? 'background:#444' : ''}"></div> ${m.name}</div>`; 
+                list.innerHTML += `<div class="recovery-item"><div class="dot ${color === 'gray' ? '' : color}" style="${color === 'gray' ? 'background:#555' : ''}"></div> ${m.name}</div>`; 
             });
         }
 
